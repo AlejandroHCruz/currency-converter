@@ -51,6 +51,9 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:gravity="end"
+        android:hint="@string/converter_hing"
+        app:hintTextColor="@color/colorBackground"
+        app:hintAnimationEnabled="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
