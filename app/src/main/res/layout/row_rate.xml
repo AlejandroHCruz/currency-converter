@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorBackground"
+    android:minHeight="72dp"
+    android:padding="@dimen/margin_16dp">
+
+    <ImageView
+        android:id="@+id/currency_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_argentina" />
+
+    <TextView
+        android:id="@+id/currency_title"
+        style="@style/TextViewCurrencyDetail"
+        android:ellipsize="end"
+        android:letterSpacing="-0.02"
+        android:lineSpacingExtra="5sp"
+        android:textColor="@color/colorPrimaryBlack"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/currency_description"
+        app:layout_constraintStart_toEndOf="@+id/currency_icon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="USD" />
+
+    <TextView
+        android:id="@+id/currency_description"
+        style="@style/TextViewCurrencyDetail"
+        android:ellipsize="end"
+        android:letterSpacing="-0.01"
+        android:lineSpacingExtra="4sp"
+        android:textColor="@color/colorPrimaryGrey"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/currency_icon"
+        app:layout_constraintTop_toBottomOf="@+id/currency_title"
+        tools:text="US Dollar" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/currency_amount_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:gravity="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/currency_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorPrimaryGrey"
+            android:imeActionLabel="Done"
+            android:inputType="numberDecimal"
+            android:maxWidth="93dp"
+            android:minWidth="38dp"
+            android:singleLine="true"
+            android:textSize="24sp"
+            tools:text="1183.06" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
