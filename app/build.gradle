@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
@@ -21,7 +22,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '29.0.2'
 }
 
 dependencies {
@@ -39,6 +39,17 @@ dependencies {
 
     //region UI
     implementation "com.google.android.material:material:1.1.0"
+    //endregion
+
+    //region Utils
+    // retrofit for REST
+    implementation "com.squareup.retrofit2:retrofit:2.8.1"
+    implementation "com.squareup.retrofit2:converter-moshi:2.8.1"
+    // moshi for JSON
+    implementation "com.squareup.moshi:moshi-kotlin:1.9.2"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.9.2"
+    //OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.5.0'
     //endregion
 
     //region tests
