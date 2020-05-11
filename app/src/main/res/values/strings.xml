@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Currency Converter</string>
+    <string name="title_currency_rates">Rates</string>
+    <string name="converter_hing" translatable="false">0</string>
+</resources>
