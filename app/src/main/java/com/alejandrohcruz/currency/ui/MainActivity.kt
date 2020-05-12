@@ -1,7 +1,8 @@
-package com.alejandrohcruz.currency
+package com.alejandrohcruz.currency.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.alejandrohcruz.currency.R
 import com.alejandrohcruz.currency.ui.currencyconverter.CurrencyConverterFragment
 
 class MainActivity : AppCompatActivity() {
