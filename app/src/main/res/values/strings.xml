@@ -2,4 +2,41 @@
     <string name="app_name">Currency Converter</string>
     <string name="title_currency_rates">Rates</string>
     <string name="converter_hint" translatable="false">0</string>
+    <string name="network_error">Network error</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="search_error">Search failed</string>
+
+    <!-- Currency names -->
+    <string name="UNKNOWN">Unknown</string>
+    <string name="AUD">Australian Dollar</string>
+    <string name="BGN">Bulgarian Lev</string>
+    <string name="BRL">Brazilian Real</string>
+    <string name="CAD">Canadian Dollar</string>
+    <string name="CHF">Swiss Franc</string>
+    <string name="CNY">Chinese Yuan/Renminbi</string>
+    <string name="CZK">Czech Koruna</string>
+    <string name="DKK">Danish Krone</string>
+    <string name="GBP">British Pound</string>
+    <string name="HKD">Hongkongese Dollar</string>
+    <string name="HRK">Croatian Kuna</string>
+    <string name="HUF">Hungarian Forint</string>
+    <string name="IDR">Indonesian Rupiah</string>
+    <string name="ILS">Israeli New Shekel</string>
+    <string name="INR">Indian Rupee</string>
+    <string name="ISK">Icelandic Krona</string>
+    <string name="JPY">Japanese Yen</string>
+    <string name="KRW">South Korean Won</string>
+    <string name="MXN">Mexican Peso</string>
+    <string name="MYR">Malaysian Ringgit</string>
+    <string name="NOK">Norwegian Kroner</string>
+    <string name="NZD">New Zealandish Dollar</string>
+    <string name="PHP">Philippine Peso</string>
+    <string name="PLN">Polish Zloty</string>
+    <string name="RON">Romanian New Lei</string>
+    <string name="RUB">Russian Rouble</string>
+    <string name="SEK">Swedish Krona</string>
+    <string name="SGD">Singaporean Dollar</string>
+    <string name="THB">Thailandese Baht</string>
+    <string name="USD">US Dollar</string>
+    <string name="ZAR">South African Rand</string>
 </resources>

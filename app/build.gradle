@@ -16,12 +16,28 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    viewBinding {
+        enabled = true
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+    compileOptions {
+        // Make the project compatible with Pre-Oreo devices
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        pickFirst 'META-INF/kotlinx-io.kotlin_module'
+        pickFirst 'META-INF/atomicfu.kotlin_module'
+        pickFirst 'META-INF/kotlinx-coroutines-core.kotlin_module'
+        pickFirst 'META-INF/kotlinx-coroutines-io.kotlin_module'
     }
 }
 
@@ -51,6 +67,7 @@ dependencies {
     kapt "com.squareup.moshi:moshi-kotlin-codegen:1.9.2"
     //OkHttp
     implementation 'com.squareup.okhttp3:okhttp:4.5.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.5.0'
     //endregion
 
     //region tests
@@ -58,11 +75,51 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.1"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
     //endregion
+
+    //region coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.2'
+    //endregion
+
+    //region LiveData
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha02'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-alpha02'
+    //endregion
+
+    //region Dagger
+    implementation "com.google.dagger:dagger:2.27"
+    kapt "com.google.dagger:dagger-compiler:2.27"
+    implementation "com.google.dagger:dagger-android:2.27"
+    implementation "com.google.dagger:dagger-android-support:2.27"
+    kapt "com.google.dagger:dagger-android-processor:2.27"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:2.27"
+    //endregion
+
     //region Firebase
     implementation 'com.google.firebase:firebase-analytics:17.4.1'
     implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
     //endregion
 
+    //region Testing
+    //UI Testing , AndroidJUnitRunner and JUnit Rules &Espresso dependencies
+    //junit 5
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testImplementation 'org.junit.platform:junit-platform-runner:1.6.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'org.assertj:assertj-core:3.15.0'
+    androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
+    androidTestImplementation ('androidx.test.espresso:espresso-core:3.2.0',{
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation 'androidx.test:rules:1.2.0'
+    implementation 'androidx.test.espresso:espresso-idling-resource:3.2.0'
+    implementation 'androidx.test.espresso:espresso-contrib:3.2.0'
+    implementation 'androidx.arch.core:core-testing:2.1.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2'
+    //endregion
 }
 
 // Note: Google Play Services plugin needs to be at the end of the file or the build will fail
