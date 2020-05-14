@@ -51,9 +51,8 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:gravity="end"
-        android:hint="@string/converter_hint"
-        app:hintTextColor="@color/colorBackground"
         app:hintAnimationEnabled="false"
+        app:hintTextColor="@color/colorBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -61,13 +60,14 @@
             android:id="@+id/currency_amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@color/colorPrimaryGrey"
+            android:backgroundTint="@color/colorLighterGrey"
             android:imeActionLabel="Done"
             android:inputType="numberDecimal"
             android:maxWidth="93dp"
             android:minWidth="38dp"
             android:singleLine="true"
             android:textSize="24sp"
+            android:textStyle="bold"
             tools:text="1183.06" />
 
     </com.google.android.material.textfield.TextInputLayout>
