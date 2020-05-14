@@ -6,5 +6,6 @@
 
     <color name="colorPrimaryBlack">#191C1F</color>
     <color name="colorPrimaryGrey">#8B959E</color>
+    <color name="colorLighterGrey">#CCC</color>
     <color name="colorBackground">#FFFFFF</color>
 </resources>
