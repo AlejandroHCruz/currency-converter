@@ -33,7 +33,7 @@ object DrawableResUtils {
             CurrencyEnum.MYR -> R.drawable.ic_malaysia
             CurrencyEnum.NOK -> R.drawable.ic_norway
             CurrencyEnum.NZD -> R.drawable.ic_new_zealand
-            CurrencyEnum.PHP -> R.drawable.ic_philipinnes
+            CurrencyEnum.PHP -> R.drawable.ic_philippines
             CurrencyEnum.PLN -> R.drawable.ic_poland
             CurrencyEnum.RON -> R.drawable.ic_romania
             CurrencyEnum.RUB -> R.drawable.ic_russia
