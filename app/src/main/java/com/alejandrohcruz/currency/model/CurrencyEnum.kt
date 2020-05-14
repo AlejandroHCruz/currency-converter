@@ -1,6 +1,9 @@
 package com.alejandrohcruz.currency.model
 
-enum class CurrenciesEnum {
+/**
+ * Defines all the known currency types
+ */
+enum class CurrencyEnum {
     UNKNOWN,
     AUD, // Australia Dollar
     BGN, // Bulgaria Lev
@@ -32,5 +35,15 @@ enum class CurrenciesEnum {
     SGD, // Singapore Dollar
     THB, // Thailand Baht
     USD, // USA Dollar
-    ZAR, // South Africa Rand
+    ZAR; // South Africa Rand
+
+    companion object {
+
+        // Keep in memory, avoid re-creating a new array every time fromString() is called
+        private val values = values()
+
+        fun fromString(enumAsString: String): CurrencyEnum {
+            return values.find { it.name == enumAsString } ?: UNKNOWN
+        }
+    }
 }
