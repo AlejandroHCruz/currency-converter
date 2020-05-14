@@ -35,7 +35,7 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
             }
 
             // Set the flag's Image
-            currencyIcon.setImageResource(
+            itemBinding.currencyFlag.currencyIcon.setImageResource(
                 DrawableResUtils.getDrawableResForCurrency(currency)
             )
 
