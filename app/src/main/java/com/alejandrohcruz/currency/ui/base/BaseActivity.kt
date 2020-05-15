@@ -8,9 +8,6 @@ import dagger.android.AndroidInjection
 
 abstract class BaseActivity : AppCompatActivity(), BaseView {
 
-    // TODO: Remove or make open and use
-    protected lateinit var viewModel: BaseViewModel
-
     protected abstract fun initializeViewModel()
     abstract fun observeViewModel()
     protected abstract fun initViewBinding()
