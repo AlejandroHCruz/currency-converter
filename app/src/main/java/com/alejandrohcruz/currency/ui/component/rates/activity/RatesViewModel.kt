@@ -47,8 +47,12 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     val showToast: LiveData<Event<Any>> get() = showToastPrivate
 
 
-    fun getConversionRates() {
-        ratesDataUseCase.getConversionRates()
+    fun getConversionRates(delayInMs: Long = 0L) {
+        ratesDataUseCase.getConversionRates(delayInMs)
+    }
+
+    fun stopGettingConversionRates() {
+        ratesDataUseCase.stopGetConversionRatesJob()
     }
 
     fun setBaseCurrency(currency: CurrencyEnum) {

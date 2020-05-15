@@ -12,6 +12,8 @@ import javax.net.ssl.SSLContext
 
 object SslUtils {
 
+    val TAG = this.javaClass.simpleName
+
     /**
      * @brief Make sure that the SSL Engine has the correct configuration
      * Source: https://github.com/parse-community/Parse-SDK-Android/issues/448#issuecomment-300308099
@@ -36,7 +38,7 @@ object SslUtils {
                 it.init(null, null, null)
                 true
             } catch (e: KeyManagementException) {
-                // TODO: Handle
+                e.message?.let { message ->  L.e(TAG, message) }
                 false
             }
             if (wasSslInitialized) {
@@ -76,10 +78,12 @@ object SslUtils {
                     // by showing a push notification on the device.
                     GoogleApiAvailability.getInstance()
                         .showErrorNotification(it, e.connectionStatusCode)
+                } else {
+                    L.v(TAG, "Google Play Services are not available")
                 }
 
             } catch (e: GooglePlayServicesNotAvailableException) {
-                // TODO: Handle
+                e.message?.let { message -> L.e(TAG, message) }
             }
         }
     }

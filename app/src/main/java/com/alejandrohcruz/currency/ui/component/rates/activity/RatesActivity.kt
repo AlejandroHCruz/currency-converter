@@ -13,6 +13,7 @@ import com.alejandrohcruz.currency.databinding.RatesActivityBinding
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
 import com.alejandrohcruz.currency.ui.component.rates.adapter.RatesAdapter
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.DATA_REFRESH_DELAY
 import com.alejandrohcruz.currency.utils.EspressoIdlingResource
 import com.alejandrohcruz.currency.utils.Event
 import com.alejandrohcruz.currency.utils.observe
@@ -31,6 +32,7 @@ class RatesActivity : BaseActivity() {
         @VisibleForTesting
         get() = EspressoIdlingResource.idlingResource
 
+    //region init
     override fun initViewBinding() {
         binding = RatesActivityBinding.inflate(layoutInflater)
         val view = binding.root
@@ -51,15 +53,26 @@ class RatesActivity : BaseActivity() {
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@RatesActivity)
             setHasFixedSize(true)
+            adapter = RatesAdapter(ratesViewModel)
         }
-
-        ratesViewModel.getConversionRates()
     }
+    //endregion
+
+    //region lifecycle
+    override fun onStart() {
+        ratesViewModel.getConversionRates()
+        super.onStart()
+    }
+
+    override fun onStop() {
+        ratesViewModel.stopGettingConversionRates()
+        super.onStop()
+    }
+    //endregion
 
     private fun bindListData(RatesModel: RatesModel) {
         if (RatesModel.ratesMap != null) {
-
-            binding.recyclerView.adapter = RatesAdapter(ratesViewModel, RatesModel.ratesMap)
+            (binding.recyclerView.adapter as? RatesAdapter?)?.onRatesUpdated(RatesModel.ratesMap)
             showDataView(true)
         } else {
             showDataView(false)
@@ -109,10 +122,16 @@ class RatesActivity : BaseActivity() {
     private fun handleRatesPayload(RatesModel: Resource<RatesModel>) {
         when (RatesModel) {
             is Resource.Loading -> showLoadingView()
-            is Resource.Success -> RatesModel.data?.let { bindListData(RatesModel = it) }
+            is Resource.Success -> {
+                RatesModel.data?.let { bindListData(RatesModel = it) }
+                // Retry
+                ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
+            }
             is Resource.DataError -> {
                 showDataView(false)
                 RatesModel.errorCode?.let { ratesViewModel.showToastMessage(it) }
+                // Keep trying
+                ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
         }
     }

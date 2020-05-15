@@ -1,6 +1,7 @@
 package com.alejandrohcruz.currency.data.remote
 
 import com.alejandrohcruz.currency.BuildConfig
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.ANDROID_API_URL
 import com.alejandrohcruz.currency.utils.Constants.INSTANCE.BASE_URL
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -51,9 +52,9 @@ constructor() {
         okHttpBuilder.readTimeout(TIMEOUT_READ.toLong(), TimeUnit.SECONDS)
         val client = okHttpBuilder.build()
         retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL).client(client)
-                .addConverterFactory(MoshiConverterFactory.create())
-                .build()
+            .baseUrl(BASE_URL + ANDROID_API_URL).client(client)
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build()
     }
 
     fun <S> createService(serviceClass: Class<S>): S {
