@@ -8,25 +8,47 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.listeners.RecyclerItemListener
 import com.alejandrohcruz.currency.ui.component.rates.activity.RatesViewModel
 import com.alejandrohcruz.currency.utils.L
-import com.alejandrohcruz.currency.utils.observe
 
-class RatesAdapter(private val ratesViewModel: RatesViewModel) :
+class RatesAdapter(
+    private val ratesViewModel: RatesViewModel
+) :
     RecyclerView.Adapter<RateViewHolder>() {
 
     //region properties
     private val TAG = this.javaClass.simpleName
 
-    private var currencyNames: List<String> = emptyList()
-    private var conversionRates: List<Double> = emptyList()
+    private var rates: Map<String, Double>? = null
+
+    private var currencyNames: ArrayList<String> = ArrayList()
+    private var conversionRates: ArrayList<Double> = ArrayList()
     //endregion
 
     private val onItemClickListener: RecyclerItemListener = object : RecyclerItemListener {
-        override fun onItemSelected(currency: CurrencyEnum) {
+        override fun onItemSelected(currency: CurrencyEnum, position: Int) {
+
+            currencyNames.apply {
+                val name = this[position]
+                removeAt(position)
+                reverse()
+                add(name)
+                reverse()
+            }
+
+            conversionRates.apply {
+                val rate = this[position]
+                removeAt(position)
+                reverse()
+                add(rate)
+                reverse()
+            }
+
+            notifyItemMoved(position, 0)
+
             ratesViewModel.setBaseCurrency(currency)
         }
     }
 
-    //region Bind/Create ViewHolder
+    //region bind / create ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RateViewHolder {
         val itemBinding = RowRateBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return RateViewHolder(itemBinding)
@@ -42,15 +64,24 @@ class RatesAdapter(private val ratesViewModel: RatesViewModel) :
     //endregion
 
     override fun getItemCount(): Int {
-        return conversionRates.size
+        return conversionRates.size.plus(1)
     }
 
     /**
      * Called when the data is updated in the ViewModel and the Activity is observing it
      */
     fun onRatesUpdated(rates: Map<String, Double>?) {
-        currencyNames = rates?.keys?.toList() ?: emptyArray<String>().toList()
-        conversionRates = rates?.values?.toList() ?: emptyArray<Double>().toList()
+        this.rates?.forEach {
+            // TODO: update the values in lieu
+            it.key
+        }
+        currencyNames =
+            (arrayListOf(
+                ratesViewModel.baseCurrency.value?.name ?: "EUR"
+            ) + (rates?.keys?.toList()
+                ?: emptyArray<String>().toList())) as ArrayList<String>
+        conversionRates = (arrayListOf(1.0) + (rates?.values?.toList()
+            ?: emptyArray<Double>().toList())) as ArrayList<Double>
         notifyDataSetChanged()
     }
 }

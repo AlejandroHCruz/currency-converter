@@ -18,6 +18,7 @@ object StringResUtils {
             CurrencyEnum.CNY -> R.string.CNY
             CurrencyEnum.CZK -> R.string.CZK
             CurrencyEnum.DKK -> R.string.DKK
+            CurrencyEnum.EUR -> R.string.EUR
             CurrencyEnum.GBP -> R.string.GBP
             CurrencyEnum.HKD -> R.string.HKD
             CurrencyEnum.HRK -> R.string.HRK

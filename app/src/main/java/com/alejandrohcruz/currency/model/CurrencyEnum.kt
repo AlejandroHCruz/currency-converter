@@ -13,6 +13,7 @@ enum class CurrencyEnum {
     CNY, // China Yuan/Renminbi
     CZK, // Czech Koruna
     DKK, // Denmark Krone
+    EUR, // Euro
     GBP, // Great Britain Pound
     HKD, // Hong Kong Dollar
     HRK, // Croatia Kuna
