@@ -8,6 +8,8 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.listeners.RecyclerItemListener
 import com.alejandrohcruz.currency.ui.component.rates.activity.RatesViewModel
 import com.alejandrohcruz.currency.utils.L
+import java.util.*
+import kotlin.collections.ArrayList
 
 class RatesAdapter(
     private val ratesViewModel: RatesViewModel
@@ -26,21 +28,8 @@ class RatesAdapter(
     private val onItemClickListener: RecyclerItemListener = object : RecyclerItemListener {
         override fun onItemSelected(currency: CurrencyEnum, position: Int) {
 
-            currencyNames.apply {
-                val name = this[position]
-                removeAt(position)
-                reverse()
-                add(name)
-                reverse()
-            }
-
-            conversionRates.apply {
-                val rate = this[position]
-                removeAt(position)
-                reverse()
-                add(rate)
-                reverse()
-            }
+            Collections.swap(currencyNames, position, 0)
+            Collections.swap(conversionRates, position, 0)
 
             notifyItemMoved(position, 0)
 
