@@ -7,6 +7,7 @@ import com.alejandrohcruz.currency.ui.base.listeners.RecyclerItemListener
 import com.alejandrohcruz.currency.utils.DrawableResUtils
 import com.alejandrohcruz.currency.utils.StringResUtils
 import com.alejandrohcruz.currency.utils.setRippleEffectEnabled
+import com.alejandrohcruz.currency.utils.toPresentableString
 
 class RateViewHolder(private val itemBinding: RowRateBinding) :
     RecyclerView.ViewHolder(itemBinding.root) {
@@ -30,7 +31,7 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
 
             // Set the value in the input field
             currencyAmountInputLayout.editText?.apply {
-                setText(conversionRate.toString())
+                setText(conversionRate.toPresentableString())
                 hint = if (conversionRate == 0.0) "0"  else ""
             }
 
@@ -39,9 +40,19 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
                 DrawableResUtils.getDrawableResForCurrency(currency)
             )
 
-            // Container configuration
+            //region Container configuration
             root.setRippleEffectEnabled(true)
-            root.setOnClickListener { recyclerItemListener.onItemSelected(currency) }
+
+            // For reacting to user interactions, please
+            // use the position from the holder, so it is the right/current one
+            // Source: https://stackoverflow.com/a/55567038
+            root.setOnClickListener {
+                recyclerItemListener.onItemSelected(
+                    currency,
+                    adapterPosition
+                )
+            }
+            //endregion
         }
     }
 }

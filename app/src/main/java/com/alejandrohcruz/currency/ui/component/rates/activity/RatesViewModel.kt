@@ -31,11 +31,14 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     private val noSearchFoundPrivate: MutableLiveData<Unit> = MutableLiveData()
     val noSearchFound: LiveData<Unit> get() = noSearchFoundPrivate
 
+    private val baseCurrencyPrivate = MutableLiveData<CurrencyEnum>()
+    val baseCurrency : LiveData<CurrencyEnum> get() = baseCurrencyPrivate
+
     /**
      * UI actions as event, user action is single one time event, Shouldn't be multiple time consumption
      */
-    private val setBaseCurrencyPrivate = MutableLiveData<Event<RatesItem>>()
-    val setBaseCurrency: LiveData<Event<RatesItem>> get() = setBaseCurrencyPrivate
+    private val setBaseCurrencyPrivate = MutableLiveData<Event<CurrencyEnum>>()
+    val setBaseCurrency: LiveData<Event<CurrencyEnum>> get() = setBaseCurrencyPrivate
 
     /**
      * Error handling as UI
@@ -48,16 +51,18 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
 
     fun getConversionRates(delayInMs: Long = 0L) {
-        ratesDataUseCase.getConversionRates(delayInMs)
+        ratesDataUseCase.getConversionRates(delayInMs, baseCurrencyPrivate.value ?: CurrencyEnum.MXN)
     }
 
     fun stopGettingConversionRates() {
         ratesDataUseCase.stopGetConversionRatesJob()
     }
 
+    // TODO: Call this on init
     fun setBaseCurrency(currency: CurrencyEnum) {
-        // TODO: Implement
-        // setBaseCurrencyPrivate.value = Event(currency)
+        setBaseCurrencyPrivate.value = Event(currency)
+        baseCurrencyPrivate.value = currency
+        // TODO: cancel the other query and remake
     }
 
     fun showSnackbarMessage(@StringRes message: Int) {

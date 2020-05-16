@@ -19,6 +19,7 @@ object DrawableResUtils {
             CurrencyEnum.CNY -> R.drawable.ic_china
             CurrencyEnum.CZK -> R.drawable.ic_czech_republic
             CurrencyEnum.DKK -> R.drawable.ic_denmark
+            CurrencyEnum.EUR -> R.drawable.ic_european_union
             CurrencyEnum.GBP -> R.drawable.ic_united_kingdom
             CurrencyEnum.HKD -> R.drawable.ic_hong_kong
             CurrencyEnum.HRK -> R.drawable.ic_croatia

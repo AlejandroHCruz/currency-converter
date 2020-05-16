@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.IdlingResource
 import com.alejandrohcruz.currency.R
 import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.remote.dto.RatesItem
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.databinding.RatesActivityBinding
+import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
 import com.alejandrohcruz.currency.ui.component.rates.adapter.RatesAdapter
@@ -52,8 +54,8 @@ class RatesActivity : BaseActivity() {
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@RatesActivity)
-            setHasFixedSize(true)
             adapter = RatesAdapter(ratesViewModel)
+            setHasFixedSize(true)
         }
     }
     //endregion
@@ -140,9 +142,15 @@ class RatesActivity : BaseActivity() {
         observe(ratesViewModel.ratesLiveData, ::handleRatesPayload)
         observe(ratesViewModel.newsSearchFound, ::showSearchResult)
         observe(ratesViewModel.noSearchFound, ::noSearchResult)
+        observe(ratesViewModel.baseCurrency, ::handleBaseCurrencyChanged)
         // TODO: Set base currency
         // observeEvent(ratesViewModel.setBaseCurrency, ::navigateToDetailsScreen)
         observeSnackBarMessages(ratesViewModel.showSnackBar)
         observeToast(ratesViewModel.showToast)
+    }
+
+    private fun handleBaseCurrencyChanged(currencyEnum: CurrencyEnum) {
+        // Scroll to the top, so the moved row is visible
+        binding.recyclerView.layoutManager?.scrollToPosition(0)
     }
 }
