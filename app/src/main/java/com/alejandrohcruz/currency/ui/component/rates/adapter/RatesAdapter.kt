@@ -19,8 +19,6 @@ class RatesAdapter(
     //region properties
     private val TAG = this.javaClass.simpleName
 
-    private var rates: Map<String, Double>? = null
-
     private var currencyNames: ArrayList<String> = ArrayList()
     private var conversionRates: ArrayList<Double> = ArrayList()
     //endregion
@@ -45,32 +43,63 @@ class RatesAdapter(
 
     override fun onBindViewHolder(holder: RateViewHolder, position: Int) {
         if (conversionRates.size > position) {
-                holder.bind(currencyNames[position], conversionRates[position], onItemClickListener)
+            holder.bind(currencyNames[position], conversionRates[position], onItemClickListener)
         } else {
-            L.e(TAG, "position: $position is larger than the size of rates: ${conversionRates.size}")
+            L.e(
+                TAG,
+                "position: $position is larger than the size of rates: ${conversionRates.size}"
+            )
         }
     }
     //endregion
 
     override fun getItemCount(): Int {
-        return conversionRates.size.plus(1)
+        return conversionRates.size
     }
 
     /**
      * Called when the data is updated in the ViewModel and the Activity is observing it
      */
     fun onRatesUpdated(rates: Map<String, Double>?) {
-        this.rates?.forEach {
-            // TODO: update the values in lieu
-            it.key
+
+        rates?.apply {
+
+            if (currencyNames.isEmpty() || conversionRates.isEmpty()) {
+
+                //region Define the conversion rate and names for the first time!
+                currencyNames = (listOf(ratesViewModel.baseCurrency.value?.name ?: "EUR")
+                        + keys.toList()) as ArrayList<String>
+                conversionRates = (listOf(1.0) + values.toList()) as ArrayList<Double>
+                //endregion
+
+            } else {
+
+                // region update the conversion rates
+                val orderIndex = ArrayList<Int>()
+                currencyNames.forEachIndexed { _, currency ->
+                    orderIndex.add(keys.indexOf(currency))
+                }
+                val valuesAsList = values.toList()
+                orderIndex.forEachIndexed { index, indexValue ->
+                    // Check that we have a valid index, since the base currency is always missing from the rates Map
+                    conversionRates[index] = if (index >= 0 && indexValue >= 0) {
+                        // Update the value
+                        valuesAsList[indexValue]
+                    } else {
+                        if (currencyNames[index] == (ratesViewModel.baseCurrency.value?.name ?: CurrencyEnum.EUR.name)) {
+                            // Base currency
+                            1.0
+                        } else {
+                            // Unknown, keep unchanged
+                            conversionRates[index].also { L.e(TAG, "NANI?") }
+                        }
+                    }
+                }
+                //endregion
+
+            }
         }
-        currencyNames =
-            (arrayListOf(
-                ratesViewModel.baseCurrency.value?.name ?: "EUR"
-            ) + (rates?.keys?.toList()
-                ?: emptyArray<String>().toList())) as ArrayList<String>
-        conversionRates = (arrayListOf(1.0) + (rates?.values?.toList()
-            ?: emptyArray<Double>().toList())) as ArrayList<Double>
+
         notifyDataSetChanged()
     }
 }
