@@ -51,7 +51,7 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
 
     fun getConversionRates(delayInMs: Long = 0L) {
-        ratesDataUseCase.getConversionRates(delayInMs, baseCurrencyPrivate.value ?: CurrencyEnum.MXN)
+        ratesDataUseCase.getConversionRates(delayInMs, baseCurrencyPrivate.value ?: CurrencyEnum.EUR)
     }
 
     fun stopGettingConversionRates() {
