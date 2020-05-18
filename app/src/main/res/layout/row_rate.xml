@@ -64,9 +64,11 @@
             android:layout_height="match_parent"
             android:backgroundTint="@color/colorLighterGrey"
             android:imeActionLabel="Done"
+            android:imeOptions="actionDone"
             android:inputType="numberDecimal"
             android:maxWidth="93dp"
             android:minWidth="38dp"
+            android:textColor="@color/colorPrimaryBlack"
             android:textSize="24sp"
             android:textStyle="bold"
             tools:text="1183.06" />
