@@ -12,11 +12,14 @@ import com.alejandrohcruz.currency.utils.toPresentableString
 class RateViewHolder(private val itemBinding: RowRateBinding) :
     RecyclerView.ViewHolder(itemBinding.root) {
 
+    private var recyclerItemListener: RecyclerItemListener? = null
     fun bind(
         currencyName: String,
         conversionRate: Double,
         recyclerItemListener: RecyclerItemListener
     ) {
+
+        this.recyclerItemListener = recyclerItemListener
 
         itemBinding.apply {
 
@@ -33,6 +36,12 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
             currencyAmountInputLayout.editText?.apply {
                 setText(conversionRate.toPresentableString())
                 hint = if (conversionRate == 0.0) "0"  else ""
+                setOnFocusChangeListener { _, _ ->
+                    if (hasFocus()) recyclerItemListener.onTextBeingEdited(adapterPosition)
+                    else {
+                        recyclerItemListener.onTextNotBeingEdited(adapterPosition)
+                    }
+                }
             }
 
             // Set the flag's Image

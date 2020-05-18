@@ -21,6 +21,8 @@ class RatesAdapter(
 
     private var currencyNames: ArrayList<String> = ArrayList()
     private var conversionRates: ArrayList<Double> = ArrayList()
+
+    private var rowBeingEdited: Int? = null
     //endregion
 
     private val onItemClickListener: RecyclerItemListener = object : RecyclerItemListener {
@@ -32,6 +34,14 @@ class RatesAdapter(
             notifyItemMoved(position, 0)
 
             ratesViewModel.setBaseCurrency(currency)
+        }
+
+        override fun onTextBeingEdited(position: Int) {
+            rowBeingEdited = position
+        }
+
+        override fun onTextNotBeingEdited(position: Int) {
+            if (rowBeingEdited == position) rowBeingEdited = null
         }
     }
 
@@ -100,7 +110,44 @@ class RatesAdapter(
             }
         }
 
-        notifyDataSetChanged()
+        if (rowBeingEdited == null) {
+            // Refresh all the elements
+            notifyDataSetChanged()
+        } else {
+            // Don't refresh the row whose EditText is being edited
+            rowBeingEdited?.let {
+                val start: Int
+                val end: Int
+                val last = conversionRates.size.minus(1)
+
+                when (it) {
+                    -1 -> {
+                        // invalid case
+                        return
+                    }
+                    0 -> {
+                        // don't refresh the first row
+                        start = 1
+                        end = last
+                    }
+                    last -> {
+                        // don't refresh the last row
+                        start = 0
+                        end = last.minus(1)
+                    }
+                    else -> {
+                        // Don't refresh a row in the middle by breaking the refresh in 2:
+                        // 1. First part is start until end
+                        start = 0
+                        end = it.minus(1)
+                        // 2. Second part is this:
+                        notifyItemRangeChanged(it.plus(1), last)
+                    }
+
+                }
+                notifyItemRangeChanged(start, end)
+            }
+        }
     }
 }
 
