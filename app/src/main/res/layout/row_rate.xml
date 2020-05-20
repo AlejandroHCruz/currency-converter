@@ -58,7 +58,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <!-- Extends the Material TextInputEditText -->
+        <com.alejandrohcruz.currency.ui.custom.KeyboardDismissTextInputEditText
             android:id="@+id/currency_amount"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
