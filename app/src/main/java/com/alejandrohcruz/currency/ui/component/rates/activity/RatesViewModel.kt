@@ -12,6 +12,7 @@ import com.alejandrohcruz.currency.ui.base.BaseViewModel
 import com.alejandrohcruz.currency.usecase.RatesUseCase
 import com.alejandrohcruz.currency.usecase.errors.ErrorManager
 import com.alejandrohcruz.currency.utils.Event
+import java.math.BigDecimal
 import javax.inject.Inject
 
 class RatesViewModel@Inject
@@ -33,6 +34,10 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
     private val baseCurrencyPrivate = MutableLiveData<CurrencyEnum>()
     val baseCurrency : LiveData<CurrencyEnum> get() = baseCurrencyPrivate
+
+    private val baseMultiplierPrivate = MutableLiveData<BigDecimal>()
+    val baseMultiplier : LiveData<BigDecimal> get() = baseMultiplierPrivate
+
 
     /**
      * UI actions as event, user action is single one time event, Shouldn't be multiple time consumption
@@ -63,6 +68,10 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
         setBaseCurrencyPrivate.value = Event(currency)
         baseCurrencyPrivate.value = currency
         // TODO: cancel the other query and remake
+    }
+
+    fun setBaseMultiplier(multiplier: BigDecimal) {
+        baseMultiplierPrivate.value = multiplier
     }
 
     fun showSnackbarMessage(@StringRes message: Int) {

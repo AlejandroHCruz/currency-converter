@@ -8,6 +8,7 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.listeners.RecyclerItemListener
 import com.alejandrohcruz.currency.ui.component.rates.activity.RatesViewModel
 import com.alejandrohcruz.currency.utils.L
+import java.math.BigDecimal
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -25,7 +26,7 @@ class RatesAdapter(
     private var rowBeingEdited: Int? = null
     //endregion
 
-    private val onItemClickListener: RecyclerItemListener = object : RecyclerItemListener {
+    private val onItemInteractionListener: RecyclerItemListener = object : RecyclerItemListener {
         override fun onItemSelected(currency: CurrencyEnum, position: Int) {
 
             Collections.swap(currencyNames, position, 0)
@@ -43,6 +44,17 @@ class RatesAdapter(
         override fun onTextNotBeingEdited(position: Int) {
             if (rowBeingEdited == position) rowBeingEdited = null
         }
+
+        override fun onBaseMultiplierChanged(newBaseMultiplier: BigDecimal) {
+            val previousBaseMultiplier = ratesViewModel.baseMultiplier.value
+            if (newBaseMultiplier != previousBaseMultiplier) {
+                ratesViewModel.setBaseMultiplier(newBaseMultiplier)
+                if (previousBaseMultiplier != null) {
+                    // Only refresh the UI after the first time the multiplier is defined
+                    updateAllRowsExceptTheOneSelected()
+                }
+            }
+        }
     }
 
     //region bind / create ViewHolder
@@ -53,7 +65,12 @@ class RatesAdapter(
 
     override fun onBindViewHolder(holder: RateViewHolder, position: Int) {
         if (conversionRates.size > position) {
-            holder.bind(currencyNames[position], conversionRates[position], onItemClickListener)
+            holder.bind(
+                ratesViewModel.baseMultiplier.value ?: 1.toBigDecimal(),
+                currencyNames[position],
+                conversionRates[position],
+                onItemInteractionListener
+            )
         } else {
             L.e(
                 TAG,
@@ -110,6 +127,11 @@ class RatesAdapter(
             }
         }
 
+        updateAllRowsExceptTheOneSelected()
+    }
+
+    private fun updateAllRowsExceptTheOneSelected() {
+
         if (rowBeingEdited == null) {
             // Refresh all the elements
             notifyDataSetChanged()
@@ -137,15 +159,19 @@ class RatesAdapter(
                     }
                     else -> {
                         // Don't refresh a row in the middle by breaking the refresh in 2:
-                        // 1. First part is start until end
+                        // 1. First part is from start until one before the selected one
                         start = 0
                         end = it.minus(1)
-                        // 2. Second part is this:
+                        // 2. Second part is this the one below the selected one until the last one
                         notifyItemRangeChanged(it.plus(1), last)
                     }
 
                 }
-                notifyItemRangeChanged(start, end)
+                if (start == end) {
+                    notifyItemChanged(start)
+                } else {
+                    notifyItemRangeChanged(start, end)
+                }
             }
         }
     }

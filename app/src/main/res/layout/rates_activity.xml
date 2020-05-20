@@ -13,21 +13,23 @@
         style="@style/TextAppearance.AppCompat.Title"
         android:layout_width="wrap_content"
         android:layout_height="24dp"
-        android:layout_marginTop="@dimen/margin_16dp"
         android:layout_marginStart="72dp"
+        android:layout_marginTop="@dimen/margin_16dp"
+        android:background="@color/colorBackground"
         android:lineSpacingExtra="3dp"
         android:text="@string/title_currency_rates"
         android:textSize="20sp"
-        android:background="@color/colorBackground"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Rates"/>
+        tools:text="Rates" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_16dp"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
         android:paddingBottom="55dp"
         app:layout_constraintTop_toBottomOf="@+id/fragment_title_text_view" />
 
