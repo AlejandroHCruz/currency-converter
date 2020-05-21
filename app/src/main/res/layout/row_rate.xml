@@ -72,6 +72,7 @@
             android:textColor="@color/colorPrimaryBlack"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textAlignment="viewEnd"
             tools:text="1183.06" />
 
     </com.google.android.material.textfield.TextInputLayout>
