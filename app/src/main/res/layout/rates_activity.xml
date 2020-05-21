@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Rates" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.alejandrohcruz.currency.ui.custom.KeyboardDismissingRecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
