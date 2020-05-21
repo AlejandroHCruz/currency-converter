@@ -67,7 +67,10 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     fun setBaseCurrency(currency: CurrencyEnum) {
         setBaseCurrencyPrivate.value = Event(currency)
         baseCurrencyPrivate.value = currency
-        // TODO: cancel the other query and remake
+
+        // Get the new conversion rates for this new base currency
+        stopGettingConversionRates()
+        getConversionRates(250L)
     }
 
     fun setBaseMultiplier(multiplier: BigDecimal) {
