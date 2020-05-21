@@ -27,7 +27,11 @@ class RatesAdapter(
     //endregion
 
     private val onItemInteractionListener: RecyclerItemListener = object : RecyclerItemListener {
-        override fun onItemSelected(currency: CurrencyEnum, position: Int) {
+        override fun onItemSelected(
+            currency: CurrencyEnum,
+            position: Int,
+            newBaseMultiplier: BigDecimal?
+        ) {
 
             Collections.swap(currencyNames, position, 0)
             Collections.swap(conversionRates, position, 0)
@@ -35,6 +39,7 @@ class RatesAdapter(
             notifyItemMoved(position, 0)
 
             ratesViewModel.setBaseCurrency(currency)
+            ratesViewModel.setBaseMultiplier(newBaseMultiplier ?: 1.toBigDecimal())
         }
 
         override fun onTextBeingEdited(position: Int) {

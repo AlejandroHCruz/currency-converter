@@ -12,6 +12,7 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.listeners.RecyclerItemListener
 import com.alejandrohcruz.currency.utils.*
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class RateViewHolder(private val itemBinding: RowRateBinding) :
     RecyclerView.ViewHolder(itemBinding.root) {
@@ -115,6 +116,7 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
             currencyAmountInputLayout.editText?.apply {
 
                 val valueToDisplay = conversionRate.toBigDecimal().times(baseMultiplier)
+                    .setScale(2, RoundingMode.HALF_UP)
 
                 setText(valueToDisplay.toPresentableString())
 
@@ -150,7 +152,8 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
             root.setOnClickListener {
                 recyclerItemListener.onItemSelected(
                     currency,
-                    adapterPosition
+                    adapterPosition,
+                    currencyAmountInputLayout.editText?.text.toString().toBigDecimalOrNull()
                 )
             }
             //endregion

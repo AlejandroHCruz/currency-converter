@@ -4,7 +4,11 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import java.math.BigDecimal
 
 interface RecyclerItemListener {
-    fun onItemSelected(currency: CurrencyEnum, position: Int)
+    fun onItemSelected(
+        currency: CurrencyEnum,
+        position: Int,
+        newBaseMultiplier: BigDecimal?
+    )
     fun onTextBeingEdited(position: Int)
     fun onTextNotBeingEdited(position: Int)
     fun onBaseMultiplierChanged(newBaseMultiplier: BigDecimal)
