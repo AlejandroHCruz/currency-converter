@@ -10,6 +10,7 @@ import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.remote.dto.RatesItem
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.databinding.RatesActivityBinding
+import com.alejandrohcruz.currency.model.Currency
 import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
@@ -71,14 +72,15 @@ class RatesActivity : BaseActivity() {
     }
     //endregion
 
-    private fun bindListData(RatesModel: RatesModel) {
-        if (RatesModel.ratesMap != null) {
-            (binding.recyclerView.adapter as? RatesAdapter?)?.onRatesUpdated(RatesModel.ratesMap)
+    private fun bindListData(cachedCurrencies: List<Currency>) {
+        if (cachedCurrencies.isNotEmpty()) {
+            (binding.recyclerView.adapter as? RatesAdapter?)?.onRatesUpdated(cachedCurrencies)
             showDataView(true)
         } else {
             showDataView(false)
         }
-        EspressoIdlingResource.decrement()
+        // FIXME: this breaks when loading from local on app start
+        // EspressoIdlingResource.decrement()
     }
 
     private fun observeSnackBarMessages(event: LiveData<Event<Int>>) {
@@ -138,6 +140,7 @@ class RatesActivity : BaseActivity() {
     }
 
     override fun observeViewModel() {
+        observe(ratesViewModel.cachedCurrenciesLiveData, :: handleCachedCurrenciesChanged)
         observe(ratesViewModel.ratesLiveData, ::handleRatesPayload)
         observe(ratesViewModel.newsSearchFound, ::showSearchResult)
         observe(ratesViewModel.noSearchFound, ::noSearchResult)
@@ -146,6 +149,10 @@ class RatesActivity : BaseActivity() {
         // observeEvent(ratesViewModel.setBaseCurrency, ::navigateToDetailsScreen)
         observeSnackBarMessages(ratesViewModel.showSnackBar)
         observeToast(ratesViewModel.showToast)
+    }
+
+    private fun handleCachedCurrenciesChanged(cachedCurrencies: List<Currency>) {
+        bindListData(cachedCurrencies)
     }
 
     private fun handleBaseCurrencyChanged(currencyEnum: CurrencyEnum) {

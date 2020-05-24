@@ -32,6 +32,8 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
      */
     var ratesLiveData: MutableLiveData<Resource<RatesModel>> = ratesDataUseCase.ratesLiveData
 
+    var cachedCurrenciesLiveData = ratesDataUseCase.cachedCurrenciesLiveData
+
     private val newsSearchFoundPrivate: MutableLiveData<RatesItem> = MutableLiveData()
     val newsSearchFound: LiveData<RatesItem> get() = newsSearchFoundPrivate
 
@@ -79,7 +81,7 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     //region lifecycle
     init {
         ratesLiveData.observeForever(ratesObserver)
-        ratesDataUseCase.cachedCurrenciesLiveData.observeForever(cachedCurrenciesObserver)
+        cachedCurrenciesLiveData.observeForever(cachedCurrenciesObserver)
     }
 
     /**
@@ -91,7 +93,7 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
      */
     override fun onCleared() {
         ratesLiveData.removeObserver(ratesObserver)
-        ratesDataUseCase.cachedCurrenciesLiveData.removeObserver(cachedCurrenciesObserver)
+        cachedCurrenciesLiveData.removeObserver(cachedCurrenciesObserver)
         super.onCleared()
     }
     //endregion
@@ -111,7 +113,6 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     //endregion
 
     //region base currency and multiplier
-    // TODO: Call this on init
     fun setBaseCurrency(currencyEnum: CurrencyEnum) {
         setBaseCurrencyPrivate.value = Event(currencyEnum)
         baseCurrencyPrivate.value = currencyEnum

@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class DataRepository @Inject
 constructor(private val remoteRepository: RemoteRepository, private val localRepository: LocalRepository) : DataSource {
-    // TODO: Use this in the UI
+
     val cachedCurrencies = localRepository.cachedCurrencies
 
     override suspend fun requestConversionRates(delayInMs: Long, baseCurrency: CurrencyEnum): Resource<RatesModel> {
