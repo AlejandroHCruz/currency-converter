@@ -1,6 +1,7 @@
 package com.alejandrohcruz.currency.usecase
 
 import androidx.lifecycle.MutableLiveData
+import com.alejandrohcruz.currency.data.DataRepository
 import com.alejandrohcruz.currency.data.DataSource
 import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.error.Error.Companion.NETWORK_ERROR
@@ -15,18 +16,19 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class RatesUseCase @Inject
-constructor(private val dataRepository: DataSource, override val coroutineContext: CoroutineContext) : UseCase, CoroutineScope {
+constructor(private val dataRepository: DataRepository, override val coroutineContext: CoroutineContext) : UseCase, CoroutineScope {
 
     val TAG = this.javaClass.simpleName
 
     private val ratesMutableLiveData = MutableLiveData<Resource<RatesModel>>()
     override val ratesLiveData: MutableLiveData<Resource<RatesModel>> = ratesMutableLiveData
+    val cachedCurrenciesLiveData = (dataRepository as DataRepository).cachedCurrencies
     override var currentJob: Job? = null
 
     override fun getConversionRates(delayInMs: Long, baseCurrency: CurrencyEnum) {
         // Sanity check: only one active job at a time
         if (currentJob == null || currentJob?.isActive == false) {
-            var serviceResponse: Resource<RatesModel>?
+            var serviceResponse: Resource<RatesModel>
             ratesMutableLiveData.postValue(Resource.Loading())
             currentJob = launch {
                 try {
@@ -50,5 +52,17 @@ constructor(private val dataRepository: DataSource, override val coroutineContex
             }
         }
         currentJob = null
+    }
+
+    fun storeConversionRates(ratesModel: Resource.Success<RatesModel>) {
+        launch {
+            dataRepository.storeConversionRates(ratesModel)
+        }
+    }
+
+    fun setBaseCurrency(currencyEnum: CurrencyEnum) {
+        launch {
+            dataRepository.storeBaseCurrency(currencyEnum)
+        }
     }
 }
