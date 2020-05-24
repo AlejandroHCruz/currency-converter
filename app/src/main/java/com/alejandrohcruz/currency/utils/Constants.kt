@@ -2,6 +2,15 @@ package com.alejandrohcruz.currency.utils
 
 class Constants {
     companion object INSTANCE {
+
+        //region network constants
+        const val TIMEOUT_CONNECT = 30L   // In seconds
+        const val TIMEOUT_READ = 30L      // In seconds
+        const val CONTENT_TYPE = "Content-Type"
+        const val CONTENT_TYPE_VALUE = "application/json"
+        //endregion
+
+        //region remote repository
         const val DATA_REFRESH_DELAY = 1_000L
         const val BASE_URL = "https://hiring.revolut.codes/"
         const val ANDROID_API_URL = "api/android/"

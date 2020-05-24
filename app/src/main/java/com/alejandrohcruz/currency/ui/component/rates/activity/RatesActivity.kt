@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.IdlingResource
 import com.alejandrohcruz.currency.R
 import com.alejandrohcruz.currency.data.Resource
@@ -121,18 +120,18 @@ class RatesActivity : BaseActivity() {
         // binding.pbLoading.toGone()
     }
 
-    private fun handleRatesPayload(RatesModel: Resource<RatesModel>) {
-        when (RatesModel) {
+    private fun handleRatesPayload(ratesModel: Resource<RatesModel>) {
+        when (ratesModel) {
             is Resource.Loading -> showLoadingView()
             is Resource.Success -> {
-                RatesModel.data?.let { bindListData(RatesModel = it) }
-                // Retry
+                ratesModel.data?.let { bindListData(RatesModel = it) }
+                // Refresh every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
             is Resource.DataError -> {
                 showDataView(false)
-                RatesModel.errorCode?.let { ratesViewModel.showToastMessage(it) }
-                // Keep trying
+                ratesModel.errorCode?.let { ratesViewModel.showToastMessage(it) }
+                // Keep trying every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
         }
