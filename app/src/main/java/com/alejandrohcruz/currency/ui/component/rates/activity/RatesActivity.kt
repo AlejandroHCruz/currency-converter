@@ -48,10 +48,6 @@ class RatesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState != null) {
-            // TODO: Do something
-        }
-
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@RatesActivity)
             adapter = RatesAdapter(ratesViewModel)
@@ -126,11 +122,11 @@ class RatesActivity : BaseActivity() {
         when (ratesModel) {
             is Resource.Loading -> showLoadingView()
             is Resource.Success -> {
-                ratesModel.data?.let { bindListData(RatesModel = it) }
                 // Refresh every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
             is Resource.DataError -> {
+                // TODO: Not true, only fail if it has no data at all to display
                 showDataView(false)
                 ratesModel.errorCode?.let { ratesViewModel.showToastMessage(it) }
                 // Keep trying every second
@@ -145,8 +141,6 @@ class RatesActivity : BaseActivity() {
         observe(ratesViewModel.newsSearchFound, ::showSearchResult)
         observe(ratesViewModel.noSearchFound, ::noSearchResult)
         observe(ratesViewModel.baseCurrency, ::handleBaseCurrencyChanged)
-        // TODO: Set base currency
-        // observeEvent(ratesViewModel.setBaseCurrency, ::navigateToDetailsScreen)
         observeSnackBarMessages(ratesViewModel.showSnackBar)
         observeToast(ratesViewModel.showToast)
     }

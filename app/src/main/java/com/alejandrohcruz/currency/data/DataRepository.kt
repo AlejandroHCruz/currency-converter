@@ -24,6 +24,4 @@ constructor(private val remoteRepository: RemoteRepository, private val localRep
     override suspend fun storeBaseCurrency(newBaseCurrencyEnum: CurrencyEnum) {
         localRepository.reorderCurrenciesBasedOnNewBaseOne(newBaseCurrencyEnum)
     }
-
-    // TODO: Retrieve on app start
 }

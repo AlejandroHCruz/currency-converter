@@ -41,5 +41,4 @@ constructor(private val currencyDao: CurrencyDao) {
     private suspend fun updateCurrencies(remoteCurrencies: List<Currency>) {
         currencyDao.updateCurrencies(remoteCurrencies)
     }
-    // TODO: Fun to retrieve
 }
