@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 1,
-    "identityHash": "c858ba63144aa16db8edb2f02b01d057",
+    "version": 2,
+    "identityHash": "80203dd2e298c84f8a866664651a4fb3",
     "entities": [
       {
         "tableName": "currency_table",
@@ -35,12 +35,38 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "base_multiplier_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`value` REAL NOT NULL, `id` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c858ba63144aa16db8edb2f02b01d057')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '80203dd2e298c84f8a866664651a4fb3')"
     ]
   }
 }

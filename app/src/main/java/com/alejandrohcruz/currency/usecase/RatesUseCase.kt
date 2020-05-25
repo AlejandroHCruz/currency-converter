@@ -2,10 +2,10 @@ package com.alejandrohcruz.currency.usecase
 
 import androidx.lifecycle.MutableLiveData
 import com.alejandrohcruz.currency.data.DataRepository
-import com.alejandrohcruz.currency.data.DataSource
 import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.error.Error.Companion.NETWORK_ERROR
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
+import com.alejandrohcruz.currency.model.BaseMultiplier
 import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.utils.L
 import kotlinx.coroutines.CancellationException
@@ -21,8 +21,11 @@ constructor(private val dataRepository: DataRepository, override val coroutineCo
     val TAG = this.javaClass.simpleName
 
     private val ratesMutableLiveData = MutableLiveData<Resource<RatesModel>>()
-    override val ratesLiveData: MutableLiveData<Resource<RatesModel>> = ratesMutableLiveData
-    val cachedCurrenciesLiveData = (dataRepository as DataRepository).cachedCurrencies
+    override val remoteRatesLiveData: MutableLiveData<Resource<RatesModel>> = ratesMutableLiveData
+
+    val cachedBaseMultiplierLiveData = dataRepository.cachedBaseMultiplier
+    val cachedCurrenciesLiveData = dataRepository.cachedCurrencies
+
     override var currentJob: Job? = null
 
     override fun getConversionRates(delayInMs: Long, baseCurrency: CurrencyEnum) {
@@ -60,9 +63,15 @@ constructor(private val dataRepository: DataRepository, override val coroutineCo
         }
     }
 
-    fun setBaseCurrency(currencyEnum: CurrencyEnum) {
+    fun setBaseCurrency(newBaseCurrencyEnum: CurrencyEnum) {
         launch {
-            dataRepository.storeBaseCurrency(currencyEnum)
+            dataRepository.storeBaseCurrency(newBaseCurrencyEnum)
+        }
+    }
+
+    fun setBaseMultiplier(newBaseMultiplier: BaseMultiplier) {
+        launch {
+            dataRepository.storeBaseMultiplier(newBaseMultiplier)
         }
     }
 }

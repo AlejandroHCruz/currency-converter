@@ -30,7 +30,7 @@ class RatesAdapter(
         override fun onItemSelected(
             currency: CurrencyEnum,
             position: Int,
-            newBaseMultiplier: BigDecimal?
+            newBaseMultiplier: Double?
         ) {
 
             Collections.swap(currenciesList, position, 0)
@@ -38,7 +38,7 @@ class RatesAdapter(
             notifyItemMoved(position, 0)
 
             ratesViewModel.setBaseCurrency(currency)
-            ratesViewModel.setBaseMultiplier(newBaseMultiplier ?: 1.toBigDecimal())
+            ratesViewModel.setBaseMultiplier(newBaseMultiplier ?: 1.0)
         }
 
         override fun onTextBeingEdited(position: Int) {
@@ -49,8 +49,8 @@ class RatesAdapter(
             if (rowBeingEdited == position) rowBeingEdited = null
         }
 
-        override fun onBaseMultiplierChanged(newBaseMultiplier: BigDecimal) {
-            val previousBaseMultiplier = ratesViewModel.baseMultiplier.value
+        override fun onBaseMultiplierChanged(newBaseMultiplier: Double) {
+            val previousBaseMultiplier = ratesViewModel.cachedBaseMultiplierLiveData.value?.value
             if (newBaseMultiplier != previousBaseMultiplier) {
                 ratesViewModel.setBaseMultiplier(newBaseMultiplier)
                 if (previousBaseMultiplier != null) {
@@ -70,7 +70,7 @@ class RatesAdapter(
     override fun onBindViewHolder(holder: RateViewHolder, position: Int) {
         if (currenciesList.size > position) {
             holder.bind(
-                ratesViewModel.baseMultiplier.value ?: 1.toBigDecimal(),
+                ratesViewModel.cachedBaseMultiplierLiveData.value?.value ?: 1.0,
                 currenciesList[position].title,
                 currenciesList[position].rate,
                 onItemInteractionListener

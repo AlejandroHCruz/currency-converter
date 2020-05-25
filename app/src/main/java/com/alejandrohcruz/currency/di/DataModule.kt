@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.alejandrohcruz.currency.App
 import com.alejandrohcruz.currency.data.DataRepository
 import com.alejandrohcruz.currency.data.DataSource
+import com.alejandrohcruz.currency.data.local.BaseMultiplierDao
 import com.alejandrohcruz.currency.data.local.CurrencyDao
 import com.alejandrohcruz.currency.data.local.CurrencyRoomDatabase
 import com.alejandrohcruz.currency.data.local.LocalRepository
@@ -38,13 +39,19 @@ class DataModule {
 
     @Provides
     @Singleton
+    fun providesBaseMultiplierDao(demoDatabase: CurrencyRoomDatabase): BaseMultiplierDao {
+        return demoDatabase.baseMultiplierDao()
+    }
+
+    @Provides
+    @Singleton
     fun providesCurrencyDao(demoDatabase: CurrencyRoomDatabase): CurrencyDao {
         return demoDatabase.currencyDao()
     }
 
     @Provides
     @Singleton
-    fun provideLocalRepository(currencyDao: CurrencyDao): LocalRepository {
-        return LocalRepository(currencyDao)
+    fun provideLocalRepository(currencyDao: CurrencyDao, baseMultiplierDao: BaseMultiplierDao): LocalRepository {
+        return LocalRepository(currencyDao, baseMultiplierDao)
     }
 }

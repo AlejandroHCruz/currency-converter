@@ -19,10 +19,15 @@ class Constants {
         //region local repository
         const val DATABASE_NAME = "currency_database"
         const val DATABASE_VERSION = 1
+        const val TABLE_BASE_MULTIPLIER = "base_multiplier_table"
         const val TABLE_CURRENCY = "currency_table"
         const val COLUMN_TITLE = "title"
+        const val COLUMN_BASE_MULTIPLIER_ID = "id"
+        const val COLUMN_BASE_MULTIPLIER_VALUE = "value"
         const val COLUMN_RATE = "exchange_rate"
         const val COLUMN_POSITION = "position"
+
+        const val BASE_MULTIPLIER_UNIQUE_ID = 1
         //endregion
     }
 }

@@ -1,9 +1,11 @@
 package com.alejandrohcruz.currency.ui.component.rates.activity
 
 import android.os.Bundle
+import android.os.Handler
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.IdlingResource
 import com.alejandrohcruz.currency.R
 import com.alejandrohcruz.currency.data.Resource
@@ -118,7 +120,7 @@ class RatesActivity : BaseActivity() {
         // binding.pbLoading.toGone()
     }
 
-    private fun handleRatesPayload(ratesModel: Resource<RatesModel>) {
+    private fun handleRemoteRatesPayload(ratesModel: Resource<RatesModel>) {
         when (ratesModel) {
             is Resource.Loading -> showLoadingView()
             is Resource.Success -> {
@@ -137,7 +139,7 @@ class RatesActivity : BaseActivity() {
 
     override fun observeViewModel() {
         observe(ratesViewModel.cachedCurrenciesLiveData, :: handleCachedCurrenciesChanged)
-        observe(ratesViewModel.ratesLiveData, ::handleRatesPayload)
+        observe(ratesViewModel.remoteRatesLiveData, ::handleRemoteRatesPayload)
         observe(ratesViewModel.newsSearchFound, ::showSearchResult)
         observe(ratesViewModel.noSearchFound, ::noSearchResult)
         observe(ratesViewModel.baseCurrency, ::handleBaseCurrencyChanged)
@@ -151,6 +153,10 @@ class RatesActivity : BaseActivity() {
 
     private fun handleBaseCurrencyChanged(currencyEnum: CurrencyEnum) {
         // Scroll to the top, so the moved row is visible
-        binding.recyclerView.layoutManager?.scrollToPosition(0)
+        Handler().postDelayed({
+            binding?.recyclerView?.apply {
+                layoutManager?.smoothScrollToPosition(this, RecyclerView.State(), 0)
+            }
+        }, 300L)
     }
 }

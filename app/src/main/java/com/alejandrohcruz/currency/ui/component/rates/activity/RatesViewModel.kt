@@ -8,6 +8,7 @@ import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.error.mapper.ErrorMapper
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.data.remote.dto.RatesItem
+import com.alejandrohcruz.currency.model.BaseMultiplier
 import com.alejandrohcruz.currency.model.Currency
 import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.BaseViewModel
@@ -15,7 +16,6 @@ import com.alejandrohcruz.currency.usecase.RatesUseCase
 import com.alejandrohcruz.currency.usecase.errors.ErrorManager
 import com.alejandrohcruz.currency.utils.Event
 import com.alejandrohcruz.currency.utils.L
-import java.math.BigDecimal
 import javax.inject.Inject
 
 class RatesViewModel@Inject
@@ -30,9 +30,11 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     /**
      * Data --> LiveData, Exposed as LiveData, Locally in viewModel as MutableLiveData
      */
-    var ratesLiveData: MutableLiveData<Resource<RatesModel>> = ratesDataUseCase.ratesLiveData
+    var remoteRatesLiveData: MutableLiveData<Resource<RatesModel>> = ratesDataUseCase.remoteRatesLiveData
 
     var cachedCurrenciesLiveData = ratesDataUseCase.cachedCurrenciesLiveData
+
+    var cachedBaseMultiplierLiveData = ratesDataUseCase.cachedBaseMultiplierLiveData
 
     private val newsSearchFoundPrivate: MutableLiveData<RatesItem> = MutableLiveData()
     val newsSearchFound: LiveData<RatesItem> get() = newsSearchFoundPrivate
@@ -42,10 +44,6 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
     private val baseCurrencyPrivate = MutableLiveData<CurrencyEnum>()
     val baseCurrency : LiveData<CurrencyEnum> get() = baseCurrencyPrivate
-
-    private val baseMultiplierPrivate = MutableLiveData<BigDecimal>()
-    val baseMultiplier : LiveData<BigDecimal> get() = baseMultiplierPrivate
-
 
     /**
      * UI actions as event, user action is single one time event, Shouldn't be multiple time consumption
@@ -67,7 +65,7 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     /**
      * Store the new rates when they change
      */
-    private val ratesObserver = Observer<Resource<RatesModel>> {
+    private val remoteRatesObserver = Observer<Resource<RatesModel>> {
         if (it is Resource.Success) {
             storeConversionRates(it)
         }
@@ -76,12 +74,17 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     private val cachedCurrenciesObserver = Observer<List<Currency>> {
         L.i(TAG, "Data was successfully saved: $it")
     }
+
+    private val cachedBaseMultiplierObserver = Observer<BaseMultiplier> {
+        L.i(TAG, "Base multiplier was successfully saved: $it")
+    }
     //endregion
 
     //region lifecycle
     init {
-        ratesLiveData.observeForever(ratesObserver)
+        remoteRatesLiveData.observeForever(remoteRatesObserver)
         cachedCurrenciesLiveData.observeForever(cachedCurrenciesObserver)
+        cachedBaseMultiplierLiveData.observeForever(cachedBaseMultiplierObserver)
     }
 
     /**
@@ -92,8 +95,9 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
      * prevent a leak of this ViewModel.
      */
     override fun onCleared() {
-        ratesLiveData.removeObserver(ratesObserver)
+        remoteRatesLiveData.removeObserver(remoteRatesObserver)
         cachedCurrenciesLiveData.removeObserver(cachedCurrenciesObserver)
+        cachedBaseMultiplierLiveData.removeObserver(cachedBaseMultiplierObserver)
         super.onCleared()
     }
     //endregion
@@ -124,8 +128,8 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
         getConversionRates(250L)
     }
 
-    fun setBaseMultiplier(multiplier: BigDecimal) {
-        baseMultiplierPrivate.value = multiplier
+    fun setBaseMultiplier(newBaseMultiplierValue: Double) {
+        ratesDataUseCase.setBaseMultiplier(BaseMultiplier(newBaseMultiplierValue))
     }
     //endregion
 

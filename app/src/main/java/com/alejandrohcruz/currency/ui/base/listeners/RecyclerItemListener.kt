@@ -7,9 +7,9 @@ interface RecyclerItemListener {
     fun onItemSelected(
         currency: CurrencyEnum,
         position: Int,
-        newBaseMultiplier: BigDecimal?
+        newBaseMultiplier: Double?
     )
     fun onTextBeingEdited(position: Int)
     fun onTextNotBeingEdited(position: Int)
-    fun onBaseMultiplierChanged(newBaseMultiplier: BigDecimal)
+    fun onBaseMultiplierChanged(newBaseMultiplier: Double)
 }
