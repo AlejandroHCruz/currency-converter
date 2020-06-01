@@ -67,7 +67,7 @@
             android:imeActionLabel="Done"
             android:imeOptions="actionDone"
             android:inputType="numberDecimal"
-            android:maxWidth="93dp"
+            android:maxWidth="@dimen/max_width_currency_edit_text"
             android:minWidth="38dp"
             android:textColor="@color/colorPrimaryBlack"
             android:textSize="24sp"

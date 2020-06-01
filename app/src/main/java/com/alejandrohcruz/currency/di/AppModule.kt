@@ -15,7 +15,6 @@
  */
 
 package com.alejandrohcruz.currency.di
-import com.alejandrohcruz.currency.data.local.LocalRepository
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
@@ -24,11 +23,6 @@ import kotlin.coroutines.CoroutineContext
 
 @Module
 class AppModule {
-    @Provides
-    @Singleton
-    fun provideLocalRepository(): LocalRepository {
-        return LocalRepository()
-    }
 
     @Provides
     @Singleton

@@ -3,6 +3,10 @@ package com.alejandrohcruz.currency.data.remote
 import com.alejandrohcruz.currency.BuildConfig
 import com.alejandrohcruz.currency.utils.Constants.INSTANCE.ANDROID_API_URL
 import com.alejandrohcruz.currency.utils.Constants.INSTANCE.BASE_URL
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.CONTENT_TYPE
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.CONTENT_TYPE_VALUE
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.TIMEOUT_CONNECT
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.TIMEOUT_READ
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -15,12 +19,6 @@ import javax.inject.Singleton
 @Singleton
 class ServiceGenerator @Inject
 constructor() {
-
-    //Network constants
-    private val TIMEOUT_CONNECT = 30   // In seconds
-    private val TIMEOUT_READ = 30      // In seconds
-    private val CONTENT_TYPE = "Content-Type"
-    private val CONTENT_TYPE_VALUE = "application/json"
 
     private val okHttpBuilder: OkHttpClient.Builder = OkHttpClient.Builder()
     private val retrofit: Retrofit
@@ -48,8 +46,8 @@ constructor() {
     init {
         okHttpBuilder.addInterceptor(headerInterceptor)
         okHttpBuilder.addInterceptor(logger)
-        okHttpBuilder.connectTimeout(TIMEOUT_CONNECT.toLong(), TimeUnit.SECONDS)
-        okHttpBuilder.readTimeout(TIMEOUT_READ.toLong(), TimeUnit.SECONDS)
+        okHttpBuilder.connectTimeout(TIMEOUT_CONNECT, TimeUnit.SECONDS)
+        okHttpBuilder.readTimeout(TIMEOUT_READ, TimeUnit.SECONDS)
         val client = okHttpBuilder.build()
         retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL + ANDROID_API_URL).client(client)

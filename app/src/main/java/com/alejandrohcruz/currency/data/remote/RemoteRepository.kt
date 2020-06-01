@@ -14,9 +14,9 @@ import javax.inject.Inject
 import kotlin.reflect.KSuspendFunction1
 
 class RemoteRepository @Inject
-constructor(private val serviceGenerator: ServiceGenerator) : RemoteSource {
+constructor(serviceGenerator: ServiceGenerator) : RemoteSource {
 
-    val service = serviceGenerator.createService(ConversionRatesService::class.java)
+    private val service = serviceGenerator.createService(ConversionRatesService::class.java)
 
     override suspend fun requestConversionRates(baseCurrency: CurrencyEnum): Resource<RatesModel> {
         return when (val response = processCall(service::fetchConversionRates, baseCurrency)) {
@@ -38,12 +38,12 @@ constructor(private val serviceGenerator: ServiceGenerator) : RemoteSource {
             return NO_INTERNET_CONNECTION
         }
         return try {
+            // Get response's body or error code
             val response = responseCall.invoke(baseCurrency.name)
-            val responseCode = response.code()
             if (response.isSuccessful) {
                 response.body()
             } else {
-                responseCode
+                response.code()
             }
         } catch (e: IOException) {
             NETWORK_ERROR

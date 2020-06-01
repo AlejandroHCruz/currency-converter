@@ -3,7 +3,10 @@ package com.alejandrohcruz.currency.ui.custom
 import android.content.Context
 import android.util.AttributeSet
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.recyclerview.widget.RecyclerView
+import com.alejandrohcruz.currency.R
+import com.alejandrohcruz.currency.ui.component.rates.adapter.RateViewHolder
 
 
 /**

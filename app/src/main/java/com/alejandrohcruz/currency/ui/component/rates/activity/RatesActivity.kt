@@ -1,17 +1,15 @@
 package com.alejandrohcruz.currency.ui.component.rates.activity
 
 import android.os.Bundle
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.IdlingResource
-import com.alejandrohcruz.currency.R
 import com.alejandrohcruz.currency.data.Resource
-import com.alejandrohcruz.currency.data.remote.dto.RatesItem
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.databinding.RatesActivityBinding
-import com.alejandrohcruz.currency.model.CurrencyEnum
+import com.alejandrohcruz.currency.model.Currency
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
 import com.alejandrohcruz.currency.ui.component.rates.adapter.RatesAdapter
@@ -48,10 +46,6 @@ class RatesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState != null) {
-            // TODO: Do something
-        }
-
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@RatesActivity)
             adapter = RatesAdapter(ratesViewModel)
@@ -72,26 +66,24 @@ class RatesActivity : BaseActivity() {
     }
     //endregion
 
-    private fun bindListData(RatesModel: RatesModel) {
-        if (RatesModel.ratesMap != null) {
-            (binding.recyclerView.adapter as? RatesAdapter?)?.onRatesUpdated(RatesModel.ratesMap)
+    private fun bindListData(cachedCurrencies: List<Currency>) {
+        if (cachedCurrencies.isNotEmpty()) {
+            (binding.recyclerView.adapter as? RatesAdapter?)?.onRatesUpdated(cachedCurrencies)
             showDataView(true)
         } else {
             showDataView(false)
         }
-        EspressoIdlingResource.decrement()
+        // FIXME: this breaks when loading from local on app start
+        // EspressoIdlingResource.decrement()
     }
 
+    // TODO: No internet connection
     private fun observeSnackBarMessages(event: LiveData<Event<Int>>) {
         // binding.rlNewsList.setupSnackbar(this, event, Snackbar.LENGTH_LONG)
     }
 
-    private fun observeToast(event: LiveData<Event<Any>>) {
-        // binding.rlNewsList.showToast(this, event, Snackbar.LENGTH_LONG)
-    }
-
-    private fun showSearchError() {
-        ratesViewModel.showSnackbarMessage(R.string.search_error)
+    private fun showError(@StringRes stringResId: Int) {
+        ratesViewModel.showSnackbarMessage(stringResId)
     }
 
     private fun showDataView(show: Boolean) {
@@ -111,46 +103,31 @@ class RatesActivity : BaseActivity() {
         EspressoIdlingResource.increment()
     }
 
-    private fun showSearchResult(RatesItem: RatesItem) {
-        // ratesViewModel.setBaseCurrency(RatesItem)
-        // binding.pbLoading.toGone()
-    }
-
-    private fun noSearchResult(unit: Unit) {
-        showSearchError()
-        // binding.pbLoading.toGone()
-    }
-
-    private fun handleRatesPayload(RatesModel: Resource<RatesModel>) {
-        when (RatesModel) {
+    private fun handleRemoteRatesPayload(ratesModel: Resource<RatesModel>) {
+        when (ratesModel) {
             is Resource.Loading -> showLoadingView()
             is Resource.Success -> {
-                RatesModel.data?.let { bindListData(RatesModel = it) }
-                // Retry
+                // Refresh every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
             is Resource.DataError -> {
+                // TODO: Not true, only fail if it has no data at all to display
                 showDataView(false)
-                RatesModel.errorCode?.let { ratesViewModel.showToastMessage(it) }
-                // Keep trying
+                // TODO: Snackbar
+                // ratesModel.errorCode?.let { ratesViewModel.showSnackbarMessage(it) }
+                // Keep trying every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
         }
     }
 
     override fun observeViewModel() {
-        observe(ratesViewModel.ratesLiveData, ::handleRatesPayload)
-        observe(ratesViewModel.newsSearchFound, ::showSearchResult)
-        observe(ratesViewModel.noSearchFound, ::noSearchResult)
-        observe(ratesViewModel.baseCurrency, ::handleBaseCurrencyChanged)
-        // TODO: Set base currency
-        // observeEvent(ratesViewModel.setBaseCurrency, ::navigateToDetailsScreen)
+        observe(ratesViewModel.volatileCurrenciesLiveData, ::handleCurrenciesChanged)
+        observe(ratesViewModel.remoteRatesLiveData, ::handleRemoteRatesPayload)
         observeSnackBarMessages(ratesViewModel.showSnackBar)
-        observeToast(ratesViewModel.showToast)
     }
 
-    private fun handleBaseCurrencyChanged(currencyEnum: CurrencyEnum) {
-        // Scroll to the top, so the moved row is visible
-        binding.recyclerView.layoutManager?.scrollToPosition(0)
+    private fun handleCurrenciesChanged(cachedCurrencies: List<Currency>) {
+        bindListData(cachedCurrencies)
     }
 }

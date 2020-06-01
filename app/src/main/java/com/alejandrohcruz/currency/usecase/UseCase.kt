@@ -10,6 +10,6 @@ import java.util.*
 interface UseCase {
     fun getConversionRates(delayInMs: Long, baseCurrency: CurrencyEnum)
     fun stopGetConversionRatesJob()
-    val ratesLiveData: MutableLiveData<Resource<RatesModel>>
+    val remoteRatesLiveData: MutableLiveData<Resource<RatesModel>>
     var currentJob: Job?
 }

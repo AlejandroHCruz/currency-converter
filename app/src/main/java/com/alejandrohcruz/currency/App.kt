@@ -27,12 +27,11 @@ class App : Application(), HasAndroidInjector {
         SslUtils.updateAndroidSecurityProviderIfNeeded(applicationContext)
     }
 
-    open fun initDagger() {
+    private fun initDagger() {
         DaggerAppComponent.builder().build().inject(this)
     }
 
     companion object {
         lateinit var context: Context
-
     }
 }

@@ -17,15 +17,17 @@ import java.math.RoundingMode
 class RateViewHolder(private val itemBinding: RowRateBinding) :
     RecyclerView.ViewHolder(itemBinding.root) {
 
+    private val TAG = this.javaClass.simpleName
+
     //region properties
     private var recyclerItemListener: RecyclerItemListener? = null
     private val primaryBlackColor = ContextCompat.getColor(itemBinding.root.context, R.color.colorPrimaryBlack)
     private val primaryGreyColor = ContextCompat.getColor(itemBinding.root.context, R.color.colorPrimaryGrey)
 
     // Percentage of the original exchange rate to display
-    private var baseMultiplier = 1.toBigDecimal()
+    private var baseMultiplier = 1.0
     // Exchange rate that relates to the base currency
-    private var conversionRate = 0.toBigDecimal()
+    private var conversionRate = 0.0
     //endregion
 
     //region textWatcher & keyListener properties
@@ -60,18 +62,19 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
                 //endregion
 
                 // Text Colors
-                s.toString().toBigDecimalOrNull()?.let { handleEditTextTextColor(it) }
+                s.toString().toDoubleOrNull()?.let { handleEditTextTextColor(it) }
 
                 //region update base multiplier if was manipulated by the user (hasFocus flag)
                 if (s.isNotBlank() && s.isNotEmpty() && hasFocus()) {
                     s.toString().toFloatOrNull()?.let {
                         // Define multiplier in units of the base currency
-                        val newBaseMultiplier = ((1F / conversionRate.toFloat()) * it).toBigDecimal()
+                        val newBaseMultiplier = ((1F / conversionRate.toFloat()) * it).toDouble()
                         if (newBaseMultiplier != baseMultiplier) {
                             // Set multiplier in the UI thread, as it will refresh the UI
                             itemBinding.root.post {
                                 recyclerItemListener?.onBaseMultiplierChanged(newBaseMultiplier)
                             }
+                            baseMultiplier = newBaseMultiplier
                         }
                     }
                 }
@@ -92,14 +95,18 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
     //endregion
 
     fun bind(
-        baseMultiplier: BigDecimal,
+        baseMultiplier: Double,
         currencyName: String,
         conversionRate: Double,
+        isThisRowBeingEdited: Boolean,
         recyclerItemListener: RecyclerItemListener
     ) {
 
         this.recyclerItemListener = recyclerItemListener
-        this.conversionRate = conversionRate.toBigDecimal()
+        this.baseMultiplier = baseMultiplier
+        this.conversionRate = conversionRate
+
+        L.i(TAG, "currencyName: $currencyName, conversionRate: $conversionRate, baseMultiplier: $baseMultiplier")
 
         itemBinding.apply {
 
@@ -115,8 +122,7 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
             // Set the value in the input field
             currencyAmountInputLayout.editText?.apply {
 
-                val valueToDisplay = conversionRate.toBigDecimal().times(baseMultiplier)
-                    .setScale(2, RoundingMode.HALF_UP)
+                val valueToDisplay = conversionRate.times(baseMultiplier)
 
                 setText(valueToDisplay.toPresentableString())
 
@@ -124,6 +130,14 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
 
                 addTextChangedListener(textWatcher)
 
+                //region handle focus
+
+                // request focus if needed
+                if (isThisRowBeingEdited && !hasFocus()) {
+                    requestFocus()
+                }
+
+                // Listen to editing its text
                 setOnFocusChangeListener { _, _ ->
                     if (hasFocus()) recyclerItemListener.onTextBeingEdited(adapterPosition)
                     else {
@@ -135,6 +149,8 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
                 onImeActionDone { clearFocus() }
 
                 setOnKeyListener(this@RateViewHolder.keyListener)
+                //endregion
+
                 //endregion
             }
 
@@ -153,16 +169,16 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
                 recyclerItemListener.onItemSelected(
                     currency,
                     adapterPosition,
-                    currencyAmountInputLayout.editText?.text.toString().toBigDecimalOrNull()
+                    currencyAmountInputLayout.editText?.text.toString().toDoubleOrNull()
                 )
             }
             //endregion
         }
     }
 
-    private fun handleEditTextTextColor(s: BigDecimal) {
+    private fun handleEditTextTextColor(s: Double) {
         itemBinding.currencyAmountInputLayout.editText?.apply {
-            if (s.toDouble() == 0.0) {
+            if (s == 0.0) {
                 // The zero should be grey
                 if (textColors.defaultColor != primaryGreyColor) {
                     setTextColor(primaryGreyColor)

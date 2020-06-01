@@ -15,6 +15,16 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        //region Room configuration
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas".toString())
+                arg("room.incremental", "true")
+                arg("room.expandProjection", "true")
+            }
+        }
+        //endregion
     }
     viewBinding {
         enabled = true
@@ -38,6 +48,7 @@ android {
         pickFirst 'META-INF/atomicfu.kotlin_module'
         pickFirst 'META-INF/kotlinx-coroutines-core.kotlin_module'
         pickFirst 'META-INF/kotlinx-coroutines-io.kotlin_module'
+        exclude 'META-INF/atomicfu.kotlin_module' // Room configuration
     }
 }
 
@@ -46,79 +57,78 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     //region support
-    implementation "androidx.core:core-ktx:1.2.0"
-    implementation "androidx.appcompat:appcompat:1.1.0"
-    implementation "androidx.recyclerview:recyclerview:1.1.0"
-    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+    implementation "androidx.core:core-ktx:$rootProject.coreKtxExtensions"
+    implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerViewVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion"
     //endregion
 
     //region UI
-    implementation "com.google.android.material:material:1.1.0"
+    implementation "com.google.android.material:material:$rootProject.materialVersion"
     //endregion
 
     //region Utils
     // retrofit for REST
-    implementation "com.squareup.retrofit2:retrofit:2.8.1"
-    implementation "com.squareup.retrofit2:converter-moshi:2.8.1"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.moshiVersion"
+    implementation "com.squareup.retrofit2:converter-moshi:$rootProject.moshiVersion"
     // moshi for JSON
-    implementation "com.squareup.moshi:moshi-kotlin:1.9.2"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.9.2"
+    implementation "com.squareup.moshi:moshi-kotlin:$rootProject.moshiKotlinVersion"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:$rootProject.moshiKotlinVersion"
     //OkHttp
-    implementation 'com.squareup.okhttp3:okhttp:4.5.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.5.0'
-    //endregion
-
-    //region tests
-    testImplementation "junit:junit:4.13"
-    androidTestImplementation "androidx.test.ext:junit:1.1.1"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.okHttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.okHttpVersion"
     //endregion
 
     //region coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.3.2'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$rootProject.coroutinesCommonVersion"
     //endregion
 
     //region LiveData
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0-alpha02'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.0-alpha02'
+    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.liveDataVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.liveDataVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.liveDataVersion"
+    //endregion
+
+    //region Room
+    implementation "androidx.room:room-runtime:$rootProject.roomVersion"
+    implementation "androidx.room:room-ktx:$rootProject.roomVersion"
+    kapt "androidx.room:room-compiler:$rootProject.roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$rootProject.roomVersion"
+    androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
     //endregion
 
     //region Dagger
-    implementation "com.google.dagger:dagger:2.27"
-    kapt "com.google.dagger:dagger-compiler:2.27"
-    implementation "com.google.dagger:dagger-android:2.27"
-    implementation "com.google.dagger:dagger-android-support:2.27"
-    kapt "com.google.dagger:dagger-android-processor:2.27"
-    kaptAndroidTest "com.google.dagger:dagger-compiler:2.27"
+    implementation "com.google.dagger:dagger:$rootProject.daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$rootProject.daggerVersion"
+    implementation "com.google.dagger:dagger-android:$rootProject.daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$rootProject.daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$rootProject.daggerVersion"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:$rootProject.daggerVersion"
     //endregion
 
     //region Firebase
-    implementation 'com.google.firebase:firebase-analytics:17.4.1'
-    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
+    implementation "com.google.firebase:firebase-analytics:$rootProject.firebaseAnalyticsVersion"
+    implementation "com.google.firebase:firebase-crashlytics:$rootProject.firebaseCrashlyticsVersion"
     //endregion
 
     //region Testing
-    //UI Testing , AndroidJUnitRunner and JUnit Rules &Espresso dependencies
-    //junit 5
-    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
-    testImplementation 'org.junit.platform:junit-platform-runner:1.6.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'org.assertj:assertj-core:3.15.0'
-    androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
-    androidTestImplementation ('androidx.test.espresso:espresso-core:3.2.0',{
+    // UI Testing, AndroidJUnitRunner and JUnit 5 Rules & Espresso dependencies
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$rootProject.jupiterVersion"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$rootProject.jupiterVersion"
+    testImplementation "org.junit.platform:junit-platform-runner:$rootProject.jUnitRunnerVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.jUnitExtVersion"
+    androidTestImplementation "org.assertj:assertj-core:$rootProject.assertJVersion"
+    androidTestImplementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
+    androidTestImplementation ("androidx.test.espresso:espresso-core:$rootProject.espressoVersion",{
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'androidx.test:rules:1.2.0'
-    implementation 'androidx.test.espresso:espresso-idling-resource:3.2.0'
-    implementation 'androidx.test.espresso:espresso-contrib:3.2.0'
-    implementation 'androidx.arch.core:core-testing:2.1.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2'
+    implementation "androidx.test:rules:1.2.0"
+    implementation "androidx.test.espresso:espresso-idling-resource:$rootProject.espressoVersion"
+    implementation "androidx.test.espresso:espresso-contrib:$rootProject.espressoVersion"
+    implementation "androidx.arch.core:core-testing:$rootProject.coreTestingVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$rootProject.coroutinesCommonVersion"
     //endregion
 }
 
