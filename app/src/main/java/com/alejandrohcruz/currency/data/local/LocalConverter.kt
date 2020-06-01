@@ -50,19 +50,35 @@ object LocalConverter {
         return cachedCurrencies
     }
 
-    fun reorderCurrenciesBasedOnNewBaseOne(newBaseCurrencyEnum: CurrencyEnum,
-                                           cachedCurrencies: List<Currency>?): List<Currency>? {
-        cachedCurrencies?.let {
+    fun reorderAndRecalculatedCurrenciesBasedOnNewBaseOne(newBaseCurrencyEnum: CurrencyEnum,
+                                                          cachedCurrencies: List<Currency>?): List<Currency>? {
+        cachedCurrencies?.let { currencies ->
 
-            val reorderedCurrencies = it.toMutableList()
+            val reorderedCurrencies = currencies.toMutableList()
 
-            it.forEachIndexed { index, currency ->
+            val previousBaseCurrency = currencies.find { it.position == 0 }
+            val newBaseCurrency = currencies.find { it.title ==  newBaseCurrencyEnum.name }
+
+            if (previousBaseCurrency == null || newBaseCurrency == null) {
+                L.e(TAG, "Cannot recalculate currencies when some base ones are not found")
+                return null
+            }
+
+            currencies.forEachIndexed { index, currency ->
+
+                //region reorder
                 val newPosition = if (currency.title == newBaseCurrencyEnum.name) {
                     0
                 } else currency.position.plus(1)
+                //endregion
+
+                val newRate = if (newPosition == 0)
+                        1.0
+                    else
+                        1.div(newBaseCurrency.rate.div(currency.rate))
 
                 // Update the required data (position)
-                reorderedCurrencies[index] = Currency(currency.title, currency.rate, newPosition)
+                reorderedCurrencies[index] = Currency(currency.title, newRate, newPosition)
             }
 
             return reorderedCurrencies

@@ -14,7 +14,7 @@ import com.alejandrohcruz.currency.utils.Constants.INSTANCE.TABLE_CURRENCY
 interface BaseMultiplierDao {
 
     @Query("SELECT * from base_multiplier_table LIMIT 1")
-    fun getUniqueBaseMultiplier(): LiveData<BaseMultiplier>
+    fun getUniqueBaseMultiplier(): LiveData<BaseMultiplier?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrReplace(baseMultiplier: BaseMultiplier)

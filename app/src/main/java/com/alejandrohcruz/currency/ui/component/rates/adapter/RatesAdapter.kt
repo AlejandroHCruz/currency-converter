@@ -1,7 +1,9 @@
 package com.alejandrohcruz.currency.ui.component.rates.adapter
 
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.alejandrohcruz.currency.databinding.RowRateBinding
 import com.alejandrohcruz.currency.model.Currency
@@ -9,8 +11,6 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.listeners.RecyclerItemListener
 import com.alejandrohcruz.currency.ui.component.rates.activity.RatesViewModel
 import com.alejandrohcruz.currency.utils.L
-import java.math.BigDecimal
-import java.util.*
 import kotlin.collections.ArrayList
 
 class RatesAdapter(
@@ -24,6 +24,9 @@ class RatesAdapter(
     private var currenciesList: List<Currency> = ArrayList()
 
     private var rowBeingEdited: Int? = null
+
+    private var attachedRecyclerView : RecyclerView? = null
+
     //endregion
 
     private val onItemInteractionListener: RecyclerItemListener = object : RecyclerItemListener {
@@ -32,13 +35,49 @@ class RatesAdapter(
             position: Int,
             newBaseMultiplier: Double?
         ) {
+            if (ratesViewModel.shouldAllowItemToBeClicked(position)) {
 
-            Collections.swap(currenciesList, position, 0)
+                // TODO: Use coroutines
+                Handler().postDelayed({
 
-            notifyItemMoved(position, 0)
+                    //region handle data
+                    // Collections.swap(currenciesList, position, 0)
+                    ratesViewModel.setBaseCurrency(currency, newBaseMultiplier ?: 1.0)
+                    //endregion
 
-            ratesViewModel.setBaseCurrency(currency)
-            ratesViewModel.setBaseMultiplier(newBaseMultiplier ?: 1.0)
+                    //region handle focus
+                    rowBeingEdited?.let {
+                        // When changing the base currency, the first row should be the one selected to edit
+                        attachedRecyclerView?.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                        // Make sure the next adapter refresh will refresh the first item too as it will change
+                        rowBeingEdited = null
+                    }
+                    //endregion
+
+                    //region scroll to the top, so the moved row is visible
+                    (attachedRecyclerView?.layoutManager as? LinearLayoutManager?)?.apply {
+
+                        val isScrolledToTheTop = findFirstCompletelyVisibleItemPosition() == 0
+
+                        if (!isScrolledToTheTop) {
+                            // Smooth, delayed scroll for better UX
+                            Handler().postDelayed({
+                                attachedRecyclerView?.let {
+                                    smoothScrollToPosition(
+                                        attachedRecyclerView,
+                                        RecyclerView.State(),
+                                        0
+                                    )
+                                }
+                            }, 100L)
+                        } else {
+                            // Immediate transition, as we were already at the top
+                            scrollToPosition(0)
+                        }
+                    }
+                    //endregion
+                }, 200L)
+            }
         }
 
         override fun onTextBeingEdited(position: Int) {
@@ -50,9 +89,9 @@ class RatesAdapter(
         }
 
         override fun onBaseMultiplierChanged(newBaseMultiplier: Double) {
-            val previousBaseMultiplier = ratesViewModel.cachedBaseMultiplierLiveData.value?.value
+            val previousBaseMultiplier = ratesViewModel.volatileBaseMultiplierLiveData.value
             if (newBaseMultiplier != previousBaseMultiplier) {
-                ratesViewModel.setBaseMultiplier(newBaseMultiplier)
+                ratesViewModel.setBaseMultiplierImmediately(newBaseMultiplier)
                 if (previousBaseMultiplier != null) {
                     // Only refresh the UI after the first time the multiplier is defined
                     updateAllRowsExceptTheOneSelected()
@@ -70,9 +109,10 @@ class RatesAdapter(
     override fun onBindViewHolder(holder: RateViewHolder, position: Int) {
         if (currenciesList.size > position) {
             holder.bind(
-                ratesViewModel.cachedBaseMultiplierLiveData.value?.value ?: 1.0,
+                ratesViewModel.volatileBaseMultiplierLiveData.value ?: 1.0,
                 currenciesList[position].title,
-                currenciesList[position].rate,
+                currenciesList[position].rate, // if (position != 0) currenciesList[position].rate else 1.0,
+                rowBeingEdited == position,
                 onItemInteractionListener
             )
         } else {
@@ -84,6 +124,17 @@ class RatesAdapter(
     }
     //endregion
 
+    //region lifecycle
+
+    override fun onAttachedToRecyclerView(recyclerView : RecyclerView) {
+        attachedRecyclerView = recyclerView
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView : RecyclerView){
+        attachedRecyclerView = null
+    }
+    //endregion
+
     override fun getItemCount(): Int {
         return currenciesList.size
     }
@@ -92,10 +143,11 @@ class RatesAdapter(
      * Called when the data is updated in the ViewModel and the Activity is observing it
      */
     fun onRatesUpdated(nonEmptyCachedCurrencies: List<Currency>) {
-
-        currenciesList = nonEmptyCachedCurrencies
-
-        updateAllRowsExceptTheOneSelected()
+        if (currenciesList != nonEmptyCachedCurrencies) {
+            L.i(TAG, "Updating the currencies in the UI")
+            currenciesList = nonEmptyCachedCurrencies
+            updateAllRowsExceptTheOneSelected()
+        }
     }
 
     private fun updateAllRowsExceptTheOneSelected() {

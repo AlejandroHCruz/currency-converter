@@ -17,6 +17,8 @@ import java.math.RoundingMode
 class RateViewHolder(private val itemBinding: RowRateBinding) :
     RecyclerView.ViewHolder(itemBinding.root) {
 
+    private val TAG = this.javaClass.simpleName
+
     //region properties
     private var recyclerItemListener: RecyclerItemListener? = null
     private val primaryBlackColor = ContextCompat.getColor(itemBinding.root.context, R.color.colorPrimaryBlack)
@@ -72,6 +74,7 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
                             itemBinding.root.post {
                                 recyclerItemListener?.onBaseMultiplierChanged(newBaseMultiplier)
                             }
+                            baseMultiplier = newBaseMultiplier
                         }
                     }
                 }
@@ -95,11 +98,15 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
         baseMultiplier: Double,
         currencyName: String,
         conversionRate: Double,
+        isThisRowBeingEdited: Boolean,
         recyclerItemListener: RecyclerItemListener
     ) {
 
         this.recyclerItemListener = recyclerItemListener
+        this.baseMultiplier = baseMultiplier
         this.conversionRate = conversionRate
+
+        L.i(TAG, "currencyName: $currencyName, conversionRate: $conversionRate, baseMultiplier: $baseMultiplier")
 
         itemBinding.apply {
 
@@ -123,6 +130,14 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
 
                 addTextChangedListener(textWatcher)
 
+                //region handle focus
+
+                // request focus if needed
+                if (isThisRowBeingEdited && !hasFocus()) {
+                    requestFocus()
+                }
+
+                // Listen to editing its text
                 setOnFocusChangeListener { _, _ ->
                     if (hasFocus()) recyclerItemListener.onTextBeingEdited(adapterPosition)
                     else {
@@ -134,6 +149,8 @@ class RateViewHolder(private val itemBinding: RowRateBinding) :
                 onImeActionDone { clearFocus() }
 
                 setOnKeyListener(this@RateViewHolder.keyListener)
+                //endregion
+
                 //endregion
             }
 

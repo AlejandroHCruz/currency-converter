@@ -1,5 +1,6 @@
 package com.alejandrohcruz.currency.usecase
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.alejandrohcruz.currency.data.DataRepository
 import com.alejandrohcruz.currency.data.Resource
@@ -35,9 +36,11 @@ constructor(private val dataRepository: DataRepository, override val coroutineCo
             ratesMutableLiveData.postValue(Resource.Loading())
             currentJob = launch {
                 try {
+                    Log.i(TAG, "Getting conversion rates from remote")
                     serviceResponse = dataRepository.requestConversionRates(delayInMs, baseCurrency)
                     ratesMutableLiveData.postValue(serviceResponse)
                 } catch (e: Exception) {
+                    Log.e(TAG, e.message ?: "NETWORK_ERROR due to some exception")
                     ratesMutableLiveData.postValue(Resource.DataError(NETWORK_ERROR))
                 }
             }

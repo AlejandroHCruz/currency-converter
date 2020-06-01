@@ -2,11 +2,12 @@ package com.alejandrohcruz.currency.data.local
 
 import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.local.LocalConverter.convertToLocalDatabaseCurrencyObjects
-import com.alejandrohcruz.currency.data.local.LocalConverter.reorderCurrenciesBasedOnNewBaseOne
+import com.alejandrohcruz.currency.data.local.LocalConverter.reorderAndRecalculatedCurrenciesBasedOnNewBaseOne
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.model.BaseMultiplier
 import com.alejandrohcruz.currency.model.Currency
 import com.alejandrohcruz.currency.model.CurrencyEnum
+import com.alejandrohcruz.currency.utils.L
 import javax.inject.Inject
 
 /**
@@ -47,7 +48,7 @@ constructor(
     }
 
     suspend fun reorderCurrenciesBasedOnNewBaseOne(newBaseCurrencyEnum: CurrencyEnum) {
-        reorderCurrenciesBasedOnNewBaseOne(
+        reorderAndRecalculatedCurrenciesBasedOnNewBaseOne(
             newBaseCurrencyEnum,
             cachedCurrencies.value
         )?.let {

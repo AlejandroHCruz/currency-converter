@@ -14,6 +14,7 @@ import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.ui.base.BaseViewModel
 import com.alejandrohcruz.currency.usecase.RatesUseCase
 import com.alejandrohcruz.currency.usecase.errors.ErrorManager
+import com.alejandrohcruz.currency.utils.Constants.INSTANCE.DATA_REFRESH_DELAY
 import com.alejandrohcruz.currency.utils.Event
 import com.alejandrohcruz.currency.utils.L
 import javax.inject.Inject
@@ -30,11 +31,18 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     /**
      * Data --> LiveData, Exposed as LiveData, Locally in viewModel as MutableLiveData
      */
+    // Values as received from the network operation
     var remoteRatesLiveData: MutableLiveData<Resource<RatesModel>> = ratesDataUseCase.remoteRatesLiveData
+    // Values in the database
+    private val cachedCurrenciesLiveDataPrivate = ratesDataUseCase.cachedCurrenciesLiveData
+    // Modified immediately on reordering the UI and/or when the values are updated on the database
+    private val volatileCurrenciesLiveDataPrivate: MutableLiveData<List<Currency>> = MutableLiveData()
+    // Used in the UI
+    val volatileCurrenciesLiveData: LiveData<List<Currency>> = volatileCurrenciesLiveDataPrivate
 
-    var cachedCurrenciesLiveData = ratesDataUseCase.cachedCurrenciesLiveData
-
-    var cachedBaseMultiplierLiveData = ratesDataUseCase.cachedBaseMultiplierLiveData
+    private val cachedBaseMultiplierLiveDataPrivate = ratesDataUseCase.cachedBaseMultiplierLiveData
+    private val volatileBaseMultiplierLiveDataPrivate: MutableLiveData<Double> = MutableLiveData()
+    val volatileBaseMultiplierLiveData: LiveData<Double> get() = volatileBaseMultiplierLiveDataPrivate
 
     private val newsSearchFoundPrivate: MutableLiveData<RatesItem> = MutableLiveData()
     val newsSearchFound: LiveData<RatesItem> get() = newsSearchFoundPrivate
@@ -43,13 +51,10 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     val noSearchFound: LiveData<Unit> get() = noSearchFoundPrivate
 
     private val baseCurrencyPrivate = MutableLiveData<CurrencyEnum>()
-    val baseCurrency : LiveData<CurrencyEnum> get() = baseCurrencyPrivate
 
     /**
      * UI actions as event, user action is single one time event, Shouldn't be multiple time consumption
      */
-    private val setBaseCurrencyPrivate = MutableLiveData<Event<CurrencyEnum>>()
-    val setBaseCurrency: LiveData<Event<CurrencyEnum>> get() = setBaseCurrencyPrivate
 
     /**
      * Error handling as UI
@@ -57,8 +62,6 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     private val showSnackBarPrivate = MutableLiveData<Event<Int>>()
     val showSnackBar: LiveData<Event<Int>> get() = showSnackBarPrivate
 
-    private val showToastPrivate = MutableLiveData<Event<Any>>()
-    val showToast: LiveData<Event<Any>> get() = showToastPrivate
     //endregion
 
     //region Observer properties
@@ -73,9 +76,26 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
     private val cachedCurrenciesObserver = Observer<List<Currency>> {
         L.i(TAG, "Data was successfully saved: $it")
+
+        val baseCurrencyWasNotSet = baseCurrencyPrivate.value == null
+
+        baseCurrencyPrivate.value = if (it?.isNotEmpty() == true) {
+            if (volatileCurrenciesLiveDataPrivate.value != it) {
+                volatileCurrenciesLiveDataPrivate.value = it
+            }
+            CurrencyEnum.valueOf(it.first().title)
+        } else {
+            CurrencyEnum.EUR
+        }
+
+        // Can only request the conversion rates with a valid base currency, let's do that now!
+        if (baseCurrencyWasNotSet) getConversionRates()
     }
 
-    private val cachedBaseMultiplierObserver = Observer<BaseMultiplier> {
+    private val cachedBaseMultiplierObserver = Observer<BaseMultiplier?> {
+        it?.value?.apply {
+            volatileBaseMultiplierLiveDataPrivate.value = this
+        }
         L.i(TAG, "Base multiplier was successfully saved: $it")
     }
     //endregion
@@ -83,8 +103,8 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     //region lifecycle
     init {
         remoteRatesLiveData.observeForever(remoteRatesObserver)
-        cachedCurrenciesLiveData.observeForever(cachedCurrenciesObserver)
-        cachedBaseMultiplierLiveData.observeForever(cachedBaseMultiplierObserver)
+        cachedCurrenciesLiveDataPrivate.observeForever(cachedCurrenciesObserver)
+        cachedBaseMultiplierLiveDataPrivate.observeForever(cachedBaseMultiplierObserver)
     }
 
     /**
@@ -96,15 +116,22 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
      */
     override fun onCleared() {
         remoteRatesLiveData.removeObserver(remoteRatesObserver)
-        cachedCurrenciesLiveData.removeObserver(cachedCurrenciesObserver)
-        cachedBaseMultiplierLiveData.removeObserver(cachedBaseMultiplierObserver)
+        cachedCurrenciesLiveDataPrivate.removeObserver(cachedCurrenciesObserver)
+        cachedBaseMultiplierLiveDataPrivate.removeObserver(cachedBaseMultiplierObserver)
         super.onCleared()
     }
     //endregion
 
     //region get and store the conversion rates
     fun getConversionRates(delayInMs: Long = 0L) {
-        ratesDataUseCase.getConversionRates(delayInMs, baseCurrencyPrivate.value ?: CurrencyEnum.EUR)
+        // Can only get conversion rates with a valid base currency, which comes from the local
+        // database or defaults to Euro
+        baseCurrencyPrivate.value?.let {
+            ratesDataUseCase.getConversionRates(
+                delayInMs,
+                it
+            )
+        }
     }
 
     fun stopGettingConversionRates() {
@@ -117,19 +144,25 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     //endregion
 
     //region base currency and multiplier
-    fun setBaseCurrency(currencyEnum: CurrencyEnum) {
-        setBaseCurrencyPrivate.value = Event(currencyEnum)
+    fun setBaseCurrency(currencyEnum: CurrencyEnum, newBaseMultiplierValue: Double) {
         baseCurrencyPrivate.value = currencyEnum
 
         ratesDataUseCase.setBaseCurrency(currencyEnum)
+        ratesDataUseCase.setBaseMultiplier(BaseMultiplier(newBaseMultiplierValue))
 
+        volatileBaseMultiplierLiveDataPrivate.value = newBaseMultiplierValue
+
+        // isGettingRatesForNewBaseCurrency = true
         // Get the new conversion rates for this new base currency
         stopGettingConversionRates()
-        getConversionRates(250L)
+        getConversionRates(DATA_REFRESH_DELAY)
     }
 
-    fun setBaseMultiplier(newBaseMultiplierValue: Double) {
-        ratesDataUseCase.setBaseMultiplier(BaseMultiplier(newBaseMultiplierValue))
+    fun setBaseMultiplierImmediately(newBaseMultiplierValue: Double) {
+        if (newBaseMultiplierValue != volatileBaseMultiplierLiveDataPrivate.value) {
+            volatileBaseMultiplierLiveDataPrivate.value = newBaseMultiplierValue
+            ratesDataUseCase.setBaseMultiplier(BaseMultiplier(newBaseMultiplierValue))
+        }
     }
     //endregion
 
@@ -137,24 +170,23 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     fun showSnackbarMessage(@StringRes message: Int) {
         showSnackBarPrivate.value = Event(message)
     }
-
-    fun showToastMessage(errorCode: Int) {
-        val error = errorManager.getError(errorCode)
-        showToastPrivate.value = Event(error.description)
-    }
     //endregion
 
-    fun onSearchClick(newsTitle: String) {
-        if (newsTitle.isNotEmpty()) {
-            // TODO: Do something else
-            val RateItem = null // ratesDataUseCase.searchByTitle(newsTitle)
-            if (RateItem != null) {
-                newsSearchFoundPrivate.value = RateItem
-            } else {
-                noSearchFoundPrivate.postValue(Unit)
-            }
-        } else {
-            noSearchFoundPrivate.postValue(Unit)
-        }
+    //region click throttling
+    private var lastItemClickTimestamp = System.currentTimeMillis()
+
+    /**
+     * Throttle the click interaction to 300ms between click events to avoid potential
+     * glitches and saving too often to the database.
+     */
+    fun shouldAllowItemToBeClicked(position: Int): Boolean {
+        if (position == 0) return false
+
+        val currentTimestamp = System.currentTimeMillis()
+        return if (currentTimestamp.minus(lastItemClickTimestamp) > 300L) {
+            lastItemClickTimestamp = currentTimestamp
+            true
+        } else false
     }
+    //endregion
 }

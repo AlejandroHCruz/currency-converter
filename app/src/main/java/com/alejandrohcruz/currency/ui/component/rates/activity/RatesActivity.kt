@@ -1,19 +1,15 @@
 package com.alejandrohcruz.currency.ui.component.rates.activity
 
 import android.os.Bundle
-import android.os.Handler
+import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.IdlingResource
-import com.alejandrohcruz.currency.R
 import com.alejandrohcruz.currency.data.Resource
-import com.alejandrohcruz.currency.data.remote.dto.RatesItem
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.databinding.RatesActivityBinding
 import com.alejandrohcruz.currency.model.Currency
-import com.alejandrohcruz.currency.model.CurrencyEnum
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
 import com.alejandrohcruz.currency.ui.component.rates.adapter.RatesAdapter
@@ -81,16 +77,13 @@ class RatesActivity : BaseActivity() {
         // EspressoIdlingResource.decrement()
     }
 
+    // TODO: No internet connection
     private fun observeSnackBarMessages(event: LiveData<Event<Int>>) {
         // binding.rlNewsList.setupSnackbar(this, event, Snackbar.LENGTH_LONG)
     }
 
-    private fun observeToast(event: LiveData<Event<Any>>) {
-        // binding.rlNewsList.showToast(this, event, Snackbar.LENGTH_LONG)
-    }
-
-    private fun showSearchError() {
-        ratesViewModel.showSnackbarMessage(R.string.search_error)
+    private fun showError(@StringRes stringResId: Int) {
+        ratesViewModel.showSnackbarMessage(stringResId)
     }
 
     private fun showDataView(show: Boolean) {
@@ -110,16 +103,6 @@ class RatesActivity : BaseActivity() {
         EspressoIdlingResource.increment()
     }
 
-    private fun showSearchResult(RatesItem: RatesItem) {
-        // ratesViewModel.setBaseCurrency(RatesItem)
-        // binding.pbLoading.toGone()
-    }
-
-    private fun noSearchResult(unit: Unit) {
-        showSearchError()
-        // binding.pbLoading.toGone()
-    }
-
     private fun handleRemoteRatesPayload(ratesModel: Resource<RatesModel>) {
         when (ratesModel) {
             is Resource.Loading -> showLoadingView()
@@ -130,7 +113,8 @@ class RatesActivity : BaseActivity() {
             is Resource.DataError -> {
                 // TODO: Not true, only fail if it has no data at all to display
                 showDataView(false)
-                ratesModel.errorCode?.let { ratesViewModel.showToastMessage(it) }
+                // TODO: Snackbar
+                // ratesModel.errorCode?.let { ratesViewModel.showSnackbarMessage(it) }
                 // Keep trying every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
@@ -138,25 +122,12 @@ class RatesActivity : BaseActivity() {
     }
 
     override fun observeViewModel() {
-        observe(ratesViewModel.cachedCurrenciesLiveData, :: handleCachedCurrenciesChanged)
+        observe(ratesViewModel.volatileCurrenciesLiveData, ::handleCurrenciesChanged)
         observe(ratesViewModel.remoteRatesLiveData, ::handleRemoteRatesPayload)
-        observe(ratesViewModel.newsSearchFound, ::showSearchResult)
-        observe(ratesViewModel.noSearchFound, ::noSearchResult)
-        observe(ratesViewModel.baseCurrency, ::handleBaseCurrencyChanged)
         observeSnackBarMessages(ratesViewModel.showSnackBar)
-        observeToast(ratesViewModel.showToast)
     }
 
-    private fun handleCachedCurrenciesChanged(cachedCurrencies: List<Currency>) {
+    private fun handleCurrenciesChanged(cachedCurrencies: List<Currency>) {
         bindListData(cachedCurrencies)
-    }
-
-    private fun handleBaseCurrencyChanged(currencyEnum: CurrencyEnum) {
-        // Scroll to the top, so the moved row is visible
-        Handler().postDelayed({
-            binding?.recyclerView?.apply {
-                layoutManager?.smoothScrollToPosition(this, RecyclerView.State(), 0)
-            }
-        }, 300L)
     }
 }
