@@ -181,7 +181,7 @@ class RatesAdapter(
                         // Don't refresh a row in the middle by breaking the refresh in 2:
                         // 1. First part is from start until one before the selected one
                         start = 0
-                        end = it.minus(1)
+                        end = it
                         // 2. Second part is this the one below the selected one until the last one
                         notifyItemRangeChanged(it.plus(1), last)
                     }
