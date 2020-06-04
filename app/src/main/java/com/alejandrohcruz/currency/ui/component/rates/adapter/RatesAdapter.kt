@@ -130,7 +130,7 @@ class RatesAdapter(
             holder.bind(
                 ratesViewModel.volatileBaseMultiplierLiveData.value ?: 1.0,
                 currenciesList[position].title,
-                currenciesList[position].rate, // if (position != 0) currenciesList[position].rate else 1.0,
+                currenciesList[position].rate,
                 rowBeingEdited == position,
                 onItemInteractionListener
             )

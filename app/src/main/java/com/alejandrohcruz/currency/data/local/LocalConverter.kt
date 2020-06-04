@@ -87,4 +87,40 @@ object LocalConverter {
 
         return null
     }
+
+    fun convertResponseToLocalBaseCurrency(
+        localBaseCurrency: CurrencyEnum,
+        remoteResponse: RatesModel
+    ): RatesModel {
+
+        return if (remoteResponse.baseCurrency == localBaseCurrency.name) {
+            // Local & remote base currencies are as expected, go ahead
+            remoteResponse
+        } else {
+            //region Convert to local base currency before continuing
+            RatesModel(
+                localBaseCurrency.name,
+                mutableMapOf<String, Double>().apply {
+                    remoteResponse.ratesMap?.let { rates ->
+                        val values = rates.values
+
+                        val newBaseMultiplier = 1.div(rates[localBaseCurrency.name] ?: 1.0)
+
+                        // Remote base currency is not included, let's add it
+                        this[remoteResponse.baseCurrency] = newBaseMultiplier
+
+                        rates.keys.forEachIndexed { index, key ->
+                            // this[key] = 1.div(values.elementAt(index)).times(newBaseMultiplier)
+                            this[key] = 1.div(rates[localBaseCurrency.name] ?: 1.0)
+                                .times(values.elementAt(index))
+                        }
+
+                        // Base currency should not be in the map
+                        this.remove(localBaseCurrency.name)
+                    }
+                }
+            )
+            //endregion
+        }
+    }
 }

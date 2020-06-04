@@ -2,8 +2,10 @@ package com.alejandrohcruz.currency.data.remote
 
 import com.alejandrohcruz.currency.App
 import com.alejandrohcruz.currency.data.Resource
+import com.alejandrohcruz.currency.data.error.Error.Companion.DEFAULT_ERROR
 import com.alejandrohcruz.currency.data.error.Error.Companion.NETWORK_ERROR
 import com.alejandrohcruz.currency.data.error.Error.Companion.NO_INTERNET_CONNECTION
+import com.alejandrohcruz.currency.data.local.LocalConverter.convertResponseToLocalBaseCurrency
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.data.remote.service.ConversionRatesService
 import com.alejandrohcruz.currency.model.CurrencyEnum
@@ -19,14 +21,17 @@ constructor(serviceGenerator: ServiceGenerator) : RemoteSource {
     private val service = serviceGenerator.createService(ConversionRatesService::class.java)
 
     override suspend fun requestConversionRates(baseCurrency: CurrencyEnum): Resource<RatesModel> {
-        return when (val response = processCall(service::fetchConversionRates, baseCurrency)) {
-            is RatesModel -> {
-                Resource.Success(data = response)
+        processCall(service::fetchConversionRates, baseCurrency)?.let { response ->
+            return when (response) {
+                is RatesModel -> {
+                    val data = convertResponseToLocalBaseCurrency(baseCurrency, response)
+                    Resource.Success(data = data)
+                }
+                else -> {
+                    Resource.DataError(errorCode = response as Int)
+                }
             }
-            else -> {
-                Resource.DataError(errorCode = response as Int)
-            }
-        }
+        } ?: return Resource.DataError(errorCode = DEFAULT_ERROR)
     }
 
     private suspend fun processCall(
@@ -38,8 +43,15 @@ constructor(serviceGenerator: ServiceGenerator) : RemoteSource {
             return NO_INTERNET_CONNECTION
         }
         return try {
+
+            val currencyForCall = when (baseCurrency) {
+                // Avoid using currencies that would cause others' conversion rate to be 0
+                CurrencyEnum.KRW, CurrencyEnum.IDR -> CurrencyEnum.EUR.name
+                else -> baseCurrency.name
+            }
+
             // Get response's body or error code
-            val response = responseCall.invoke(baseCurrency.name)
+            val response = responseCall.invoke(currencyForCall)
             if (response.isSuccessful) {
                 response.body()
             } else {
