@@ -1,5 +1,6 @@
 package com.alejandrohcruz.currency.data.local
 
+import com.alejandrohcruz.currency.BuildConfig
 import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.model.Currency
@@ -64,12 +65,26 @@ object LocalConverter {
                 return null
             }
 
+            val indexOfNewBaseCurrency = currencies.indexOfFirst { it.title == newBaseCurrencyEnum.name }
+
             currencies.forEachIndexed { index, currency ->
 
                 //region reorder
-                val newPosition = if (currency.title == newBaseCurrencyEnum.name) {
-                    0
-                } else currency.position.plus(1)
+                val newPosition = when (currency.title) {
+                    newBaseCurrencyEnum.name -> {
+                        0
+                    }
+                    previousBaseCurrency.title -> {
+                        1
+                    }
+                    else -> {
+                        if (indexOfNewBaseCurrency > index) index.plus(1) else index
+                    }
+                }
+
+                if (BuildConfig.DEBUG) {
+                    check(newPosition <= CurrencyEnum.values().size)
+                }
                 //endregion
 
                 val newRate = if (newPosition == 0)
@@ -110,7 +125,6 @@ object LocalConverter {
                         this[remoteResponse.baseCurrency] = newBaseMultiplier
 
                         rates.keys.forEachIndexed { index, key ->
-                            // this[key] = 1.div(values.elementAt(index)).times(newBaseMultiplier)
                             this[key] = 1.div(rates[localBaseCurrency.name] ?: 1.0)
                                 .times(values.elementAt(index))
                         }
