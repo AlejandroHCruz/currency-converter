@@ -56,46 +56,26 @@ class RatesAdapter(
         ) {
             if (ratesViewModel.shouldAllowItemToBeClicked(position)) {
 
-                // TODO: Use coroutines
-                Handler().postDelayed({
+                // handle initial animation
+                notifyItemMoved(position, 0)
 
-                    //region handle data
-                    // Collections.swap(currenciesList, position, 0)
-                    ratesViewModel.setBaseCurrency(currency, newBaseMultiplier ?: 1.0)
-                    //endregion
+                // stop updating the values in the UI
+                isBeingScrolled = true
 
-                    //region handle focus
-                    rowBeingEdited?.let {
-                        // When changing the base currency, the first row should be the one selected to edit
-                        attachedRecyclerView?.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
-                        // Make sure the next adapter refresh will refresh the first item too as it will change
-                        rowBeingEdited = null
-                    }
-                    //endregion
+                // scroll to the top, so the moved row is visible
+                Handler().postDelayed({ scrollToTopIfNeeded() }, 300L)
 
-                    //region scroll to the top, so the moved row is visible
-                    (attachedRecyclerView?.layoutManager as? LinearLayoutManager?)?.apply {
+                //region handle focus
+                rowBeingEdited?.let {
+                    // When changing the base currency, the first row should be the one selected to edit
+                    attachedRecyclerView?.findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                    // Make sure the next adapter refresh will refresh the first item too as it will change
+                    rowBeingEdited = null
+                }
+                //endregion
 
-                        val isScrolledToTheTop = findFirstCompletelyVisibleItemPosition() == 0
-
-                        if (!isScrolledToTheTop) {
-                            // Smooth, delayed scroll for better UX
-                            Handler().postDelayed({
-                                attachedRecyclerView?.let {
-                                    smoothScrollToPosition(
-                                        attachedRecyclerView,
-                                        RecyclerView.State(),
-                                        0
-                                    )
-                                }
-                            }, 100L)
-                        } else {
-                            // Immediate transition, as we were already at the top
-                            scrollToPosition(0)
-                        }
-                    }
-                    //endregion
-                }, 200L)
+                // handle data
+                ratesViewModel.setBaseCurrency(currency, newBaseMultiplier ?: 1.0)
             }
         }
 
@@ -220,6 +200,31 @@ class RatesAdapter(
                 } else {
                     notifyItemRangeChanged(start, end)
                 }
+            }
+        }
+    }
+
+    private fun scrollToTopIfNeeded() {
+        (attachedRecyclerView?.layoutManager as? LinearLayoutManager?)?.apply {
+
+            val isScrolledToTheTop = findFirstCompletelyVisibleItemPosition() == 0
+
+            if (!isScrolledToTheTop) {
+                // Smooth, delayed scroll for better UX
+                attachedRecyclerView?.let {
+                    smoothScrollToPosition(
+                        attachedRecyclerView,
+                        RecyclerView.State(),
+                        0
+                    )
+                }
+                // resume updating the values in the UI
+                isBeingScrolled = false
+            } else {
+                // Immediate transition, as we were already at the top
+                scrollToPosition(0)
+                // resume updating the values in the UI
+                isBeingScrolled = false
             }
         }
     }
