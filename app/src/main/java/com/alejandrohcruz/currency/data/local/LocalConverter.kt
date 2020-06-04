@@ -125,7 +125,6 @@ object LocalConverter {
                         this[remoteResponse.baseCurrency] = newBaseMultiplier
 
                         rates.keys.forEachIndexed { index, key ->
-                            // this[key] = 1.div(values.elementAt(index)).times(newBaseMultiplier)
                             this[key] = 1.div(rates[localBaseCurrency.name] ?: 1.0)
                                 .times(values.elementAt(index))
                         }
