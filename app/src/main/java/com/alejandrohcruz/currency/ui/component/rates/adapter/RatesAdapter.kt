@@ -22,11 +22,30 @@ class RatesAdapter(
     private val TAG = this.javaClass.simpleName
 
     private var currenciesList: List<Currency> = ArrayList()
+    private var currenciesPendingList: List<Currency>? = null
 
     private var rowBeingEdited: Int? = null
 
+    private var isBeingScrolled = false
+
     private var attachedRecyclerView : RecyclerView? = null
 
+    private var scrollingStateListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(
+            recyclerView: RecyclerView,
+            state: Int
+        ) {
+            isBeingScrolled = when (state) {
+                RecyclerView.SCROLL_STATE_DRAGGING -> true
+                RecyclerView.SCROLL_STATE_IDLE -> false
+                RecyclerView.SCROLL_STATE_SETTLING -> true
+                else -> false
+            }
+            if (!isBeingScrolled) {
+                currenciesPendingList?.let { onRatesUpdated(it) }
+            }
+        }
+    }
     //endregion
 
     private val onItemInteractionListener: RecyclerItemListener = object : RecyclerItemListener {
@@ -128,9 +147,11 @@ class RatesAdapter(
 
     override fun onAttachedToRecyclerView(recyclerView : RecyclerView) {
         attachedRecyclerView = recyclerView
+        attachedRecyclerView?.addOnScrollListener(scrollingStateListener)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView : RecyclerView){
+        attachedRecyclerView?.removeOnScrollListener(scrollingStateListener)
         attachedRecyclerView = null
     }
     //endregion
@@ -143,10 +164,17 @@ class RatesAdapter(
      * Called when the data is updated in the ViewModel and the Activity is observing it
      */
     fun onRatesUpdated(nonEmptyCachedCurrencies: List<Currency>) {
-        if (currenciesList != nonEmptyCachedCurrencies) {
-            L.i(TAG, "Updating the currencies in the UI")
-            currenciesList = nonEmptyCachedCurrencies
-            updateAllRowsExceptTheOneSelected()
+        if (isBeingScrolled) {
+            // Don't update the values while scrolling, will be applied when done
+            currenciesPendingList = nonEmptyCachedCurrencies
+        } else {
+            currenciesPendingList = null
+            // Set the values and update the UI
+            if (currenciesList != nonEmptyCachedCurrencies) {
+                L.i(TAG, "Updating the currencies in the UI")
+                currenciesList = nonEmptyCachedCurrencies
+                updateAllRowsExceptTheOneSelected()
+            }
         }
     }
 
