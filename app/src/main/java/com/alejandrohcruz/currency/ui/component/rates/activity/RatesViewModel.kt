@@ -155,7 +155,7 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
         // isGettingRatesForNewBaseCurrency = true
         // Get the new conversion rates for this new base currency
         stopGettingConversionRates()
-        getConversionRates(DATA_REFRESH_DELAY)
+        getConversionRates(DATA_REFRESH_DELAY.plus(500L))
     }
 
     fun setBaseMultiplierImmediately(newBaseMultiplierValue: Double) {
