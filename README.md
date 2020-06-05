@@ -2,8 +2,8 @@
 - 📼 Demo: https://www.youtube.com/watch?v=b25HvRB1Xig
 - ⬇️ APK: https://www.dropbox.com/s/eb23xsu0mofhsjp/CurrencyConverter.apk?dl=0
 
-# Architecture
-MVVM
+# Clean Architecture
+Diagram showing what was followed in this app:
 ![](https://user-images.githubusercontent.com/1812129/68319008-e9d39d00-00bd-11ea-9245-ebedd2a2c067.png)
 
 ## ⚙️ Technologies used
