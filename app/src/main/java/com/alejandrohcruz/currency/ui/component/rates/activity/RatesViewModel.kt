@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.alejandrohcruz.currency.data.Resource
+import com.alejandrohcruz.currency.data.error.Error.Companion.NO_ERROR
 import com.alejandrohcruz.currency.data.error.mapper.ErrorMapper
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.data.remote.dto.RatesItem
@@ -57,10 +58,10 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
      */
 
     /**
-     * Error handling as UI
+     * Error handling in the UI, specifically for network requests
      */
-    private val showSnackBarPrivate = MutableLiveData<Event<Int>>()
-    val showSnackBar: LiveData<Event<Int>> get() = showSnackBarPrivate
+    private val showRemoteRatesSnackBarPrivate = MutableLiveData<Event<Int>>()
+    val showRemoteRatesSnackBar: LiveData<Event<Int>> get() = showRemoteRatesSnackBarPrivate
 
     //endregion
 
@@ -71,6 +72,8 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     private val remoteRatesObserver = Observer<Resource<RatesModel>> {
         if (it is Resource.Success) {
             storeConversionRates(it)
+            // No error, to free the snackbar to be used later if needed
+            showRemoteRatesSnackbarMessage(NO_ERROR)
         }
     }
 
@@ -152,7 +155,6 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
         volatileBaseMultiplierLiveDataPrivate.value = newBaseMultiplierValue
 
-        // isGettingRatesForNewBaseCurrency = true
         // Get the new conversion rates for this new base currency
         stopGettingConversionRates()
         getConversionRates(DATA_REFRESH_DELAY.plus(500L))
@@ -167,8 +169,11 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     //endregion
 
     //region Snackbar & error events
-    fun showSnackbarMessage(@StringRes message: Int) {
-        showSnackBarPrivate.value = Event(message)
+    fun showRemoteRatesSnackbarMessage(@StringRes messageId: Int) {
+        // Avoid showing the same error multiple times in a row
+        if (showRemoteRatesSnackBarPrivate.value?.peekContent() != messageId) {
+            showRemoteRatesSnackBarPrivate.value = Event(messageId)
+        }
     }
     //endregion
 
