@@ -83,7 +83,10 @@ class SimpleCountingIdlingResource
         }
 
         if (counterVal < 0) {
-            throw IllegalArgumentException("Counter has been corrupted!")
+            L.e(
+                this.javaClass.simpleName,
+                "counterVal should not go below 0, except on configuration change"
+            )
         }
     }
 }
