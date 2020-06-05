@@ -3,6 +3,7 @@
     <string name="title_currency_rates">Rates</string>
     <string name="network_error">Network issue</string>
     <string name="no_internet">Offline</string>
+    <string name="empty_string" translatable="false">""</string>
 
     <!-- Currency names -->
     <string name="UNKNOWN">Unknown</string>

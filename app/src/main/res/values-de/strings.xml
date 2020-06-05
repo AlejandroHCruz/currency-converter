@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Währungsrechner Converver</string>
     <string name="title_currency_rates">Wechselkurse</string>
-    <string name="network_error">Netzwerk-Frage</string>
+    <string name="network_error">Netzwerk-Fehler</string>
     <string name="no_internet">Offline</string>
     <string name="UNKNOWN">Unbekannt</string>
 

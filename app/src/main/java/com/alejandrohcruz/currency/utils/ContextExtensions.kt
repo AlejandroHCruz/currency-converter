@@ -3,6 +3,7 @@ package com.alejandrohcruz.currency.utils
 import android.Manifest
 import android.content.Context
 import android.net.ConnectivityManager
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -18,7 +19,7 @@ fun Context.checkPlayServicesAvailability(): Boolean {
 
     if (resultCode != ConnectionResult.SUCCESS) {
         if (googleApiAvailability.isUserResolvableError(resultCode)) {
-            // TODO: Display a toast or error dialog
+            L.e("checkPlayServicesAvailability", "User solvable error: $resultCode")
         }
     }
     return resultCode == ConnectionResult.SUCCESS

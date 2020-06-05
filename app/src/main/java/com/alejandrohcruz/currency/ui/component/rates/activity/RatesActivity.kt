@@ -1,7 +1,6 @@
 package com.alejandrohcruz.currency.ui.component.rates.activity
 
 import android.os.Bundle
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,10 +12,9 @@ import com.alejandrohcruz.currency.model.Currency
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
 import com.alejandrohcruz.currency.ui.component.rates.adapter.RatesAdapter
+import com.alejandrohcruz.currency.utils.*
 import com.alejandrohcruz.currency.utils.Constants.INSTANCE.DATA_REFRESH_DELAY
-import com.alejandrohcruz.currency.utils.EspressoIdlingResource
-import com.alejandrohcruz.currency.utils.Event
-import com.alejandrohcruz.currency.utils.observe
+import com.google.android.material.snackbar.Snackbar
 import javax.inject.Inject
 
 class RatesActivity : BaseActivity() {
@@ -77,13 +75,8 @@ class RatesActivity : BaseActivity() {
         // EspressoIdlingResource.decrement()
     }
 
-    // TODO: No internet connection
     private fun observeSnackBarMessages(event: LiveData<Event<Int>>) {
-        // binding.rlNewsList.setupSnackbar(this, event, Snackbar.LENGTH_LONG)
-    }
-
-    private fun showError(@StringRes stringResId: Int) {
-        ratesViewModel.showSnackbarMessage(stringResId)
+        binding.main.setupSnackbar(this, event, Snackbar.LENGTH_LONG)
     }
 
     private fun showDataView(show: Boolean) {
@@ -113,8 +106,8 @@ class RatesActivity : BaseActivity() {
             is Resource.DataError -> {
                 // TODO: Not true, only fail if it has no data at all to display
                 showDataView(false)
-                // TODO: Snackbar
-                // ratesModel.errorCode?.let { ratesViewModel.showSnackbarMessage(it) }
+
+                ratesModel.errorCode?.let { ratesViewModel.showRemoteRatesSnackbarMessage(it) }
                 // Keep trying every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
@@ -124,7 +117,7 @@ class RatesActivity : BaseActivity() {
     override fun observeViewModel() {
         observe(ratesViewModel.volatileCurrenciesLiveData, ::handleCurrenciesChanged)
         observe(ratesViewModel.remoteRatesLiveData, ::handleRemoteRatesPayload)
-        observeSnackBarMessages(ratesViewModel.showSnackBar)
+        observeSnackBarMessages(ratesViewModel.showRemoteRatesSnackBar)
     }
 
     private fun handleCurrenciesChanged(cachedCurrencies: List<Currency>) {
