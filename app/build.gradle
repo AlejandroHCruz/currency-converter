@@ -65,6 +65,7 @@ dependencies {
 
     //region UI
     implementation "com.google.android.material:material:$rootProject.materialVersion"
+    implementation "com.shouquan:StateLayout:$rootProject.stateLayoutVersion"
     //endregion
 
     //region Utils

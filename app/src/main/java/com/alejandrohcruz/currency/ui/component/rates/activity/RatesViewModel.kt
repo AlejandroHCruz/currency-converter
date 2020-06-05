@@ -12,6 +12,7 @@ import com.alejandrohcruz.currency.data.remote.dto.RatesItem
 import com.alejandrohcruz.currency.model.BaseMultiplier
 import com.alejandrohcruz.currency.model.Currency
 import com.alejandrohcruz.currency.model.CurrencyEnum
+import com.alejandrohcruz.currency.model.ViewStateEnum
 import com.alejandrohcruz.currency.ui.base.BaseViewModel
 import com.alejandrohcruz.currency.usecase.RatesUseCase
 import com.alejandrohcruz.currency.usecase.errors.ErrorManager
@@ -32,6 +33,11 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     /**
      * Data --> LiveData, Exposed as LiveData, Locally in viewModel as MutableLiveData
      */
+
+    // Possible states are loading, content and error
+    private val viewStateLiveDataPrivate: MutableLiveData<ViewStateEnum> = MutableLiveData()
+    val viewStateLiveData: LiveData<ViewStateEnum> = viewStateLiveDataPrivate
+
     // Values as received from the network operation
     var remoteRatesLiveData: MutableLiveData<Resource<RatesModel>> = ratesDataUseCase.remoteRatesLiveData
     // Values in the database
@@ -44,12 +50,6 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
     private val cachedBaseMultiplierLiveDataPrivate = ratesDataUseCase.cachedBaseMultiplierLiveData
     private val volatileBaseMultiplierLiveDataPrivate: MutableLiveData<Double> = MutableLiveData()
     val volatileBaseMultiplierLiveData: LiveData<Double> get() = volatileBaseMultiplierLiveDataPrivate
-
-    private val newsSearchFoundPrivate: MutableLiveData<RatesItem> = MutableLiveData()
-    val newsSearchFound: LiveData<RatesItem> get() = newsSearchFoundPrivate
-
-    private val noSearchFoundPrivate: MutableLiveData<Unit> = MutableLiveData()
-    val noSearchFound: LiveData<Unit> get() = noSearchFoundPrivate
 
     private val baseCurrencyPrivate = MutableLiveData<CurrencyEnum>()
 
@@ -67,13 +67,26 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
     //region Observer properties
     /**
-     * Store the new rates when they change
+     * Store the new rates when they change, notify the view if it should change
      */
     private val remoteRatesObserver = Observer<Resource<RatesModel>> {
-        if (it is Resource.Success) {
-            storeConversionRates(it)
-            // No error, to free the snackbar to be used later if needed
-            showRemoteRatesSnackbarMessage(NO_ERROR)
+        when (it) {
+            is Resource.Success -> {
+                // Save
+                storeConversionRates(it)
+                // No error, to free the snackbar to be used later if needed
+                showRemoteRatesSnackbarMessage(NO_ERROR)
+                // Update view if needed
+                if (viewStateLiveDataPrivate.value != ViewStateEnum.CONTENT) {
+                    viewStateLiveDataPrivate.value = ViewStateEnum.CONTENT
+                }
+            }
+            is Resource.DataError -> {
+                // Update view if needed
+                if (viewStateLiveDataPrivate.value == ViewStateEnum.LOADING) {
+                    viewStateLiveDataPrivate.value = ViewStateEnum.ERROR
+                }
+            }
         }
     }
 
@@ -85,6 +98,10 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
         baseCurrencyPrivate.value = if (it?.isNotEmpty() == true) {
             if (volatileCurrenciesLiveDataPrivate.value != it) {
                 volatileCurrenciesLiveDataPrivate.value = it
+            }
+            // Update view if needed
+            if (viewStateLiveDataPrivate.value != ViewStateEnum.CONTENT) {
+                viewStateLiveDataPrivate.value = ViewStateEnum.CONTENT
             }
             CurrencyEnum.valueOf(it.first().title)
         } else {
@@ -105,6 +122,7 @@ constructor(private val ratesDataUseCase: RatesUseCase) : BaseViewModel() {
 
     //region lifecycle
     init {
+        viewStateLiveDataPrivate.value = ViewStateEnum.LOADING
         remoteRatesLiveData.observeForever(remoteRatesObserver)
         cachedCurrenciesLiveDataPrivate.observeForever(cachedCurrenciesObserver)
         cachedBaseMultiplierLiveDataPrivate.observeForever(cachedBaseMultiplierObserver)

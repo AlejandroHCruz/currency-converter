@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.alejandrohcruz.currency.data.DataRepository
 import com.alejandrohcruz.currency.data.Resource
+import com.alejandrohcruz.currency.data.error.Error.Companion.DEFAULT_ERROR
 import com.alejandrohcruz.currency.data.error.Error.Companion.NETWORK_ERROR
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.model.BaseMultiplier
@@ -40,8 +41,16 @@ constructor(private val dataRepository: DataRepository, override val coroutineCo
                     serviceResponse = dataRepository.requestConversionRates(delayInMs, baseCurrency)
                     ratesMutableLiveData.postValue(serviceResponse)
                 } catch (e: Exception) {
-                    Log.e(TAG, e.message ?: "NETWORK_ERROR due to some exception")
-                    ratesMutableLiveData.postValue(Resource.DataError(NETWORK_ERROR))
+                    when (e) {
+                        is CancellationException -> {
+                            Log.d(TAG,  "Cancelled job")
+                            ratesMutableLiveData.postValue(Resource.DataError(DEFAULT_ERROR))
+                        }
+                        else -> {
+                            Log.e(TAG, e.message ?: "NETWORK_ERROR due to some exception")
+                            ratesMutableLiveData.postValue(Resource.DataError(NETWORK_ERROR))
+                        }
+                    }
                 }
             }
         }
