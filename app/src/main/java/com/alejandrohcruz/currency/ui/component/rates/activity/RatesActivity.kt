@@ -9,15 +9,21 @@ import com.alejandrohcruz.currency.data.Resource
 import com.alejandrohcruz.currency.data.remote.dto.RatesModel
 import com.alejandrohcruz.currency.databinding.RatesActivityBinding
 import com.alejandrohcruz.currency.model.Currency
+import com.alejandrohcruz.currency.model.ViewStateEnum
 import com.alejandrohcruz.currency.viewmodel.ViewModelFactory
 import com.alejandrohcruz.currency.ui.base.BaseActivity
 import com.alejandrohcruz.currency.ui.component.rates.adapter.RatesAdapter
 import com.alejandrohcruz.currency.utils.*
 import com.alejandrohcruz.currency.utils.Constants.INSTANCE.DATA_REFRESH_DELAY
 import com.google.android.material.snackbar.Snackbar
+import com.shouquan.statelayout.StateLayout.Companion.STATE_CONTENT
+import com.shouquan.statelayout.StateLayout.Companion.STATE_ERROR
+import com.shouquan.statelayout.StateLayout.Companion.STATE_LOADING
 import javax.inject.Inject
 
 class RatesActivity : BaseActivity() {
+
+    //region properties
     private lateinit var binding: RatesActivityBinding
 
     @Inject
@@ -29,6 +35,7 @@ class RatesActivity : BaseActivity() {
     val countingIdlingResource: IdlingResource
         @VisibleForTesting
         get() = EspressoIdlingResource.idlingResource
+    //endregion
 
     //region init
     override fun initViewBinding() {
@@ -56,6 +63,7 @@ class RatesActivity : BaseActivity() {
     override fun onStart() {
         ratesViewModel.getConversionRates()
         super.onStart()
+        ratesViewModel.viewStateLiveData.value?.let { handleViewState(it) }
     }
 
     override fun onStop() {
@@ -64,49 +72,50 @@ class RatesActivity : BaseActivity() {
     }
     //endregion
 
+    //region view states
+    private fun showContentView() {
+        binding.layoutState.setState(STATE_CONTENT)
+        EspressoIdlingResource.decrement()
+    }
+
+    private fun showLoadingView() {
+        if (isConnected()) {
+            binding.layoutState.setState(STATE_LOADING)
+        }
+        EspressoIdlingResource.increment()
+    }
+
+    private fun showErrorView() {
+        binding.layoutState.setState(STATE_ERROR)
+    }
+
+    private fun handleViewState(viewStateEnum: ViewStateEnum) {
+        when (viewStateEnum) {
+            ViewStateEnum.LOADING -> showLoadingView()
+            ViewStateEnum.CONTENT -> showContentView()
+            ViewStateEnum.ERROR -> showErrorView()
+        }
+    }
+    //endregion
+
     private fun bindListData(cachedCurrencies: List<Currency>) {
         if (cachedCurrencies.isNotEmpty()) {
             (binding.recyclerView.adapter as? RatesAdapter?)?.onRatesUpdated(cachedCurrencies)
-            showDataView(true)
-        } else {
-            showDataView(false)
         }
-        // FIXME: this breaks when loading from local on app start
-        // EspressoIdlingResource.decrement()
     }
 
+    //region observe and handle live data
     private fun observeSnackBarMessages(event: LiveData<Event<Int>>) {
         binding.main.setupSnackbar(this, event, Snackbar.LENGTH_LONG)
     }
 
-    private fun showDataView(show: Boolean) {
-        /*
-        binding.tvNoData.visibility = if (show) GONE else VISIBLE
-        binding.rlNewsList.visibility = if (show) VISIBLE else GONE
-        binding.pbLoading.toGone()
-         */
-    }
-
-    private fun showLoadingView() {
-        /*
-        binding.pbLoading.toVisible()
-        binding.tvNoData.toGone()
-        binding.rlNewsList.toGone()
-         */
-        EspressoIdlingResource.increment()
-    }
-
     private fun handleRemoteRatesPayload(ratesModel: Resource<RatesModel>) {
         when (ratesModel) {
-            is Resource.Loading -> showLoadingView()
             is Resource.Success -> {
                 // Refresh every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
             }
             is Resource.DataError -> {
-                // TODO: Not true, only fail if it has no data at all to display
-                showDataView(false)
-
                 ratesModel.errorCode?.let { ratesViewModel.showRemoteRatesSnackbarMessage(it) }
                 // Keep trying every second
                 ratesViewModel.getConversionRates(DATA_REFRESH_DELAY)
@@ -117,10 +126,12 @@ class RatesActivity : BaseActivity() {
     override fun observeViewModel() {
         observe(ratesViewModel.volatileCurrenciesLiveData, ::handleCurrenciesChanged)
         observe(ratesViewModel.remoteRatesLiveData, ::handleRemoteRatesPayload)
+        observe(ratesViewModel.viewStateLiveData, ::handleViewState)
         observeSnackBarMessages(ratesViewModel.showRemoteRatesSnackBar)
     }
 
     private fun handleCurrenciesChanged(cachedCurrencies: List<Currency>) {
         bindListData(cachedCurrencies)
     }
+    //endregion
 }

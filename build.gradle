@@ -20,6 +20,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -33,7 +34,7 @@ ext {
     appCompatVersion = "1.1.0"
     constraintLayoutVersion = "1.1.3"
     coreTestingVersion = "2.1.0"
-    coreKtxExtensions = "1.2.0"
+    coreKtxExtensions = "1.3.0"
     coroutinesCommonVersion = "1.3.2"
     coroutinesVersion = "1.3.4"
     daggerVersion = "2.27"
@@ -50,4 +51,5 @@ ext {
     okHttpVersion = "4.5.0"
     recyclerViewVersion = "1.1.0"
     roomVersion = "2.2.5"
+    stateLayoutVersion = "1.0.0"
 }

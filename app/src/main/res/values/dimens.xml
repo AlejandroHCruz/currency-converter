@@ -2,4 +2,7 @@
 <resources>
     <dimen name="margin_16dp">16dp</dimen>
     <dimen name="max_width_currency_edit_text">93dp</dimen>
+    <dimen name="loading_or_error_image_size">200</dimen>
+    <!-- So that it is centered considering the title TextView -->
+    <dimen name="loading_or_error_image_bottom_padding">70dp</dimen>
 </resources>
