@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Currency Converter</string>
     <string name="title_currency_rates">Rates</string>
-    <string name="network_error">Network error</string>
-    <string name="no_internet">No internet connection</string>
-    <string name="search_error">Search failed</string>
+    <string name="network_error">Network issue</string>
+    <string name="no_internet">Offline</string>
 
     <!-- Currency names -->
     <string name="UNKNOWN">Unknown</string>
