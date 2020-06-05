@@ -1,6 +1,6 @@
 # Currency Converter App
-📼 Demo: https://www.youtube.com/watch?v=b25HvRB1Xig
-⬇️ APK: https://www.dropbox.com/s/eb23xsu0mofhsjp/CurrencyConverter.apk?dl=0
+- 📼 Demo: https://www.youtube.com/watch?v=b25HvRB1Xig
+- ⬇️ APK: https://www.dropbox.com/s/eb23xsu0mofhsjp/CurrencyConverter.apk?dl=0
 
 # Architecture
 MVVM
