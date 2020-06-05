@@ -2,4 +2,41 @@
 <resources>
     <string name="app_name">Convertisseur de devises</string>
     <string name="title_currency_rates">Taux</string>
+    <string name="network_error">Problème de réseau</string>
+    <string name="no_internet">Hors ligne</string>
+
+    <!-- Currency names -->
+    <string name="UNKNOWN">Inconnu</string>
+    <string name="AUD">Dollar australien</string>
+    <string name="BGN">Lev bulgare</string>
+    <string name="BRL">Real brésilien</string>
+    <string name="CAD">Dollar canadien</string>
+    <string name="CHF">Franc suisse</string>
+    <string name="CNY">Yuan chinois/Renminbi</string>
+    <string name="CZK">Couronne tchèque</string>
+    <string name="DKK">Couronne danoise</string>
+    <string name="EUR">Euro</string>
+    <string name="GBP">Livre britannique</string>
+    <string name="HKD">Dollar hongkongais</string>
+    <string name="HRK">Kuna croate</string>
+    <string name="HUF">Forint hongrois</string>
+    <string name="IDR">Rupiah indonésienne</string>
+    <string name="ILS">Le nouveau shekel israélien</string>
+    <string name="INR">Roupie indienne</string>
+    <string name="ISK">Couronne islandaise</string>
+    <string name="JPY">Yen japonais</string>
+    <string name="KRW">La Corée du Sud a gagné</string>
+    <string name="MXN">Peso mexicain</string>
+    <string name="MYR">Ringgit malaisien</string>
+    <string name="NOK">Couronne norvégienne</string>
+    <string name="NZD">Dollar néo-zélandais</string>
+    <string name="PHP">Peso philippin</string>
+    <string name="PLN">Zloty polonais</string>
+    <string name="RON">Nouveau Lei roumain</string>
+    <string name="RUB">Rouble russe</string>
+    <string name="SEK">Couronne suédoise</string>
+    <string name="SGD">Dollar de Singapour</string>
+    <string name="THB">Baht thaïlandais</string>
+    <string name="USD">Dollar américain</string>
+    <string name="ZAR">Le rand sud-africain</string>
 </resources>
